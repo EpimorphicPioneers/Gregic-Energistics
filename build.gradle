@@ -1,0 +1,47 @@
+import net.fabricmc.loom.task.RemapJarTask
+
+plugins {
+    alias libs.plugins.architectury
+    alias libs.plugins.architectury.loom
+    alias libs.plugins.machete // automatic jar compressing on build
+    alias libs.plugins.shadow
+}
+
+apply plugin: "dev.architectury.loom"
+apply plugin: "java"
+apply plugin: "architectury-plugin"
+apply plugin: "maven-publish"
+
+
+architectury {
+    compileOnly()
+    minecraft = libs.versions.minecraft
+}
+
+tasks.register('remapSlimJar', RemapJarTask) {
+    dependsOn(jar)
+    inputFile.set jar.archiveFile
+}
+
+group = maven_group
+
+// Formats the mod version to include the loader, Minecraft version, and build number (if present)
+String buildNumber = System.getenv("GITHUB_ACTION_NUMBER")
+version = "${mod_version}" + (buildNumber != null ? "-build.${System.getenv("GITHUB_RUN_NUMBER")}" : "")
+
+apply from: "$rootDir/gradle/scripts/architectury_loom.gradle"
+apply from: "$rootDir/gradle/scripts/capabilities.gradle"
+apply from: "$rootDir/gradle/scripts/repositories.gradle"
+apply from: "$rootDir/gradle/scripts/dependencies.gradle"
+apply from: "$rootDir/gradle/scripts/resources.gradle"
+apply from: "$rootDir/gradle/scripts/jars.gradle"
+apply from: "$rootDir/gradle/scripts/publishing.gradle"
+
+tasks.withType(JavaCompile) {
+    options.encoding = "UTF-8"
+}
+
+machete {
+    // disable machete locally for faster builds
+    enabled = false
+}
