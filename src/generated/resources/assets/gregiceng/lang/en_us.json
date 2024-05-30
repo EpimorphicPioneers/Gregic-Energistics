@@ -1,0 +1,9 @@
+{
+  "block.gregiceng.crafting_input_buffer": "ME Crafting Input Buffer",
+  "gui.gregiceng.refund_all.desc": "Refund raw materials in full",
+  "gui.gregiceng.share_inventory.desc": "Open share inventory",
+  "gui.gregiceng.share_inventory.title": "Share Inventory",
+  "gui.gregiceng.share_tank.desc": "Open share tank",
+  "gui.gregiceng.share_tank.title": "Share Tank",
+  "itemGroup.gregiceng.main": "Gregic Energistics"
+}

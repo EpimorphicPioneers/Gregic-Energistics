@@ -1,0 +1,8 @@
+{
+  "block.gregiceng.crafting_input_buffer": "ME样板输入总成",
+  "gui.gregiceng.refund_all.desc": "退回所有材料",
+  "gui.gregiceng.share_inventory.desc": "打开共享库存",
+  "gui.gregiceng.share_inventory.title": "共享库存",
+  "gui.gregiceng.share_tank.desc": "打开共享储罐",
+  "gui.gregiceng.share_tank.title": "共享储罐"
+}

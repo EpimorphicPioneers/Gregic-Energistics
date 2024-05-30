@@ -8,7 +8,6 @@ dependencies {
 
     forge forge.minecraftForge
 
-
     // lombok
     compileOnly 'org.projectlombok:lombok:1.18.24'
     annotationProcessor 'org.projectlombok:lombok:1.18.24'
@@ -20,59 +19,34 @@ dependencies {
     testImplementation 'io.javalin:javalin:5.4.2'
     testImplementation 'org.mockito:mockito-core:5.2.0'
 
-    // From Forge
-
-    // LDLib
-    modApi(forge.ldlib.forge) { transitive = false }
-
-    // Registrate
-    modApi("com.tterrag.registrate:Registrate:${forge.versions.registrate.get()}")
-
-    // Create and its dependencies
-    modCompileOnly("com.simibubi.create:create-${libs.versions.minecraft.get()}:${forge.versions.createForge.get()}:all") { transitive = false }
-    modCompileOnly forge.flywheel
-
-    // JEI
-    modCompileOnly(forge.jei.common.api) { transitive = false }
-    modCompileOnly(forge.jei.forge.api) { transitive = false }
-    modCompileOnly(forge.jei.forge.impl) { transitive = false }
-
-    // REI
-    modCompileOnly forge.rei.plugin
-    modCompileOnly forge.rei.api
-    modCompileOnly forge.rei.forge
-
-    // EMI
-    modCompileOnly("dev.emi:emi-forge:${forge.versions.emi.get()}:api")
-    modImplementation forge.emi
-
-    // TOP
-    modCompileOnly(forge.theoneprobe) { transitive = false }
-
-    // Jade
-    modImplementation(forge.jade)
-
-    // AE2
-    modImplementation(forge.ae2) { transitive = false }
-
-    //AlmostUnified
-    modImplementation(forge.almostUnified.forge)
-
-    // KJS
-    modImplementation forge.kubejs
-
     // Mixin Extras
     implementation(annotationProcessor("io.github.llamalad7:mixinextras-common:${this.forge.versions.mixinextras.get()}"))
     api(include("io.github.llamalad7:mixinextras-forge:${this.forge.versions.mixinextras.get()}"))
 
-    // Configuration
-    modApi(forge.configuration)
+    /* -------------------------------------------------- Libraries -------------------------------------------------- */
 
-    // Shimmer
-    modImplementation(forge.shimmer.forge) { transitive = false }
-    modImplementation("maven.modrinth:embeddium:0.2.10+mc1.20.1")
-    modImplementation("maven.modrinth:oculus:1.20.1-1.6.9")
+    modImplementation("com.tterrag.registrate:Registrate:${forge.versions.registrate.get()}") // Registrate
+    modImplementation(forge.configuration) // Configuration
+    modImplementation(forge.ldlib.forge) { transitive = false } // LDLib
+    modImplementation(forge.gtm) { transitive = false } // GTM
+    modImplementation(forge.ae2) { transitive = false } // AE2
+    modImplementation(forge.monomorphism) { transitive = false } // Monomorphism
 
-    // GTM
-    modImplementation(forge.gtm) { transitive = false }
+    /* -------------------------------------------------- CompileOnly -------------------------------------------------- */
+
+    modCompileOnly(forge.jei.common.api) { transitive = false } // JEI
+    modCompileOnly(forge.jei.forge.api) { transitive = false }
+    modCompileOnly(forge.jei.forge.impl) { transitive = false }
+
+    modCompileOnly forge.rei.plugin // REI
+    modCompileOnly forge.rei.api
+    modCompileOnly forge.rei.forge
+
+    modCompileOnly("dev.emi:emi-forge:${forge.versions.emi.get()}:api") // EMI
+    modImplementation forge.emi
+
+    modImplementation(forge.jade) // Jade
+
+    /* -------------------------------------------------- RuntimeOnly -------------------------------------------------- */
+
 }
