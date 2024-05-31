@@ -49,5 +49,10 @@ public class GELangHandler {
         provider.add("gui.gregiceng.refund_all.desc",
                 "Refund raw materials in full",
                 "退回所有材料");
+
+        provider.add("config.jade.plugin_gregiceng.crafting_io_buffer",
+            "Crafting IO Buffer",
+            "样板IO总成"
+        );
     }
 }

@@ -87,6 +87,7 @@ public class CraftingIOBufferPartMachine extends MEPartMachine implements ICraft
     @Getter
     @Persisted
     protected final NotifiableFluidTank shareTank;
+    @Getter
     @Persisted
     private final InternalSlot[] internalInventory = new InternalSlot[MAX_PATTERN_COUNT];
     private final BiMap<IPatternDetails, InternalSlot> patternDetailsPatternSlotMap = HashBiMap.create(MAX_PATTERN_COUNT);
@@ -410,7 +411,7 @@ public class CraftingIOBufferPartMachine extends MEPartMachine implements ICraft
         }
     }
 
-    protected class InternalSlot implements ITagSerializable<CompoundTag>, IContentChangeAware {
+    public class InternalSlot implements ITagSerializable<CompoundTag>, IContentChangeAware {
 
         @Getter
         @Setter
@@ -471,7 +472,7 @@ public class CraftingIOBufferPartMachine extends MEPartMachine implements ICraft
         }
 
         public FluidStack[] getFluidInputs() {
-            return fluidInventory.toArray(new FluidStack[0]);
+            return ArrayUtils.addAll(fluidInventory.toArray(new FluidStack[0]));
         }
 
         public void refund() {
