@@ -56,6 +56,7 @@ import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import lombok.Getter;
 import lombok.Setter;
+import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -270,6 +271,12 @@ public class CraftingIOBufferPartMachine extends MEPartMachine implements ICraft
                 internalSlot.refund();
             }
         }
+    }
+
+    @Override
+    public void onRotated(Direction oldFacing, Direction newFacing) {
+        super.onRotated(oldFacing, newFacing);
+        super.setFrontFacing(newFacing);
     }
 
     //////////////////////////////////////
