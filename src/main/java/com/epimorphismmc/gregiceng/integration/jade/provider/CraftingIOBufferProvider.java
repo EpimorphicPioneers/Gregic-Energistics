@@ -12,7 +12,9 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.registries.ForgeRegistries;
+import org.jetbrains.annotations.Nullable;
 import snownee.jade.api.BlockAccessor;
 import snownee.jade.api.IBlockComponentProvider;
 import snownee.jade.api.IServerDataProvider;
@@ -43,18 +45,16 @@ public enum CraftingIOBufferProvider implements IBlockComponentProvider, IServer
         }
         for (int i = 0; i < fluidTags.size(); ++i) {
             CompoundTag fluidTag = fluidTags.getCompound(i);
-            Fluid fluid = ForgeRegistries.FLUIDS.getValue(new ResourceLocation(fluidTag.getString("fluid")));
+            @Nullable FluidType fluid = ForgeRegistries.FLUID_TYPES.get().getValue(new ResourceLocation(fluidTag.getString("fluid")));
             long count = fluidTag.getLong("count");
             if (fluid != null){
                 iTooltip.add(
-                    fluid.getFluidType().getDescription().copy().withStyle(ChatFormatting.GOLD)
+                    fluid.getDescription().copy().withStyle(ChatFormatting.GOLD)
                         .append(Component.literal(" * ").withStyle(ChatFormatting.WHITE))
                         .append(Component.literal("" + count).withStyle(ChatFormatting.LIGHT_PURPLE))
                 );
             }
         }
-
-
     }
 
     @Override
@@ -79,7 +79,7 @@ public enum CraftingIOBufferProvider implements IBlockComponentProvider, IServer
 
                 ListTag fluidTags = new ListTag();
                 for (Fluid fluid : fluids.keySet()) {
-                    ResourceLocation key = ForgeRegistries.FLUIDS.getKey(fluid);
+                    ResourceLocation key = ForgeRegistries.FLUID_TYPES.get().getKey(fluid.getFluidType());
                     if (key != null) {
                         CompoundTag fluidTag = new CompoundTag();
                         fluidTag.putString("fluid", key.toString());
