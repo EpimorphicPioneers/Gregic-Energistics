@@ -71,9 +71,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class CraftingInputBufferMachine extends MEPartMachine implements ICraftingProvider {
+public class CraftingInputBufferPartMachine extends MEPartMachine implements ICraftingProvider {
 
-    protected static final ManagedFieldHolder MANAGED_FIELD_HOLDER = new ManagedFieldHolder(CraftingInputBufferMachine.class, MEPartMachine.MANAGED_FIELD_HOLDER);
+    protected static final ManagedFieldHolder MANAGED_FIELD_HOLDER = new ManagedFieldHolder(CraftingInputBufferPartMachine.class, MEPartMachine.MANAGED_FIELD_HOLDER);
 
     private static final int MAX_PATTERN_COUNT = 4 * 9;
 
@@ -106,7 +106,7 @@ public class CraftingInputBufferMachine extends MEPartMachine implements ICrafti
     @Nullable
     protected TickableSubscription updateSubs;
 
-    public CraftingInputBufferMachine(IMachineBlockEntity holder, Object... args) {
+    public CraftingInputBufferPartMachine(IMachineBlockEntity holder, Object... args) {
         super(holder, GTValues.UV, IO.BOTH, args);
         this.patternInventory.setFilter(stack -> stack.getItem() instanceof ProcessingPatternItem);
         for (int i = 0; i < this.internalInventory.length; i++) {
