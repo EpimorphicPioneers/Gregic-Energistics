@@ -273,12 +273,6 @@ public class CraftingIOBufferPartMachine extends MEPartMachine implements ICraft
         }
     }
 
-    @Override
-    public void onRotated(Direction oldFacing, Direction newFacing) {
-        super.onRotated(oldFacing, newFacing);
-        super.setFrontFacing(newFacing);
-    }
-
     //////////////////////////////////////
     //**********     GUI     ***********//
     //////////////////////////////////////
@@ -341,6 +335,13 @@ public class CraftingIOBufferPartMachine extends MEPartMachine implements ICraft
         }
 
         needPatternSync = true;
+    }
+
+    @Override
+    public void setFrontFacing(Direction facing) {
+        super.setFrontFacing(facing);
+        if (isRemote()) return;
+        getMainNode().setExposedOnSides(EnumSet.of(this.getFrontFacing()));
     }
 
     @Override
@@ -672,9 +673,8 @@ public class CraftingIOBufferPartMachine extends MEPartMachine implements ICraft
             if (io != IO.IN) return left;
             isOutputting = false;
             circuitInventory.handleRecipeInner(io, recipe, left, slotName, simulate);
-            shareInventory.handleRecipeInner(io, recipe, left, slotName, simulate);
             left = handleItemInner(recipe, left, simulate);
-            return left;
+            return shareInventory.handleRecipeInner(io, recipe, left, slotName, simulate);
         }
 
         @Override
@@ -726,7 +726,8 @@ public class CraftingIOBufferPartMachine extends MEPartMachine implements ICraft
         public List<FluidIngredient> handleRecipeInner(IO io, GTRecipe recipe, List<FluidIngredient> left, @Nullable String slotName, boolean simulate) {
             if (io != IO.IN) return left;
             isOutputting = false;
-            return handleFluidInner(recipe, left, simulate);
+            left = handleFluidInner(recipe, left, simulate);
+            return shareTank.handleRecipeInner(io, recipe, left, slotName, simulate);
         }
 
         @Override
