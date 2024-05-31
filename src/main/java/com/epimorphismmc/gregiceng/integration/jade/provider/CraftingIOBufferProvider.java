@@ -30,7 +30,7 @@ public enum CraftingIOBufferProvider implements IBlockComponentProvider, IServer
 
 
         ListTag itemTags = serverData.getList("items", Tag.TAG_COMPOUND);
-        ListTag fluidTags = serverData.getList("fluid", Tag.TAG_COMPOUND);
+        ListTag fluidTags = serverData.getList("fluids", Tag.TAG_COMPOUND);
         for (int i = 0; i < itemTags.size(); ++i) {
             CompoundTag itemTag = itemTags.getCompound(i);
             Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemTag.getString("item")));
@@ -49,7 +49,7 @@ public enum CraftingIOBufferProvider implements IBlockComponentProvider, IServer
             long count = fluidTag.getLong("count");
             if (fluid != null){
                 iTooltip.add(
-                    fluid.getDescription().copy().withStyle(ChatFormatting.GOLD)
+                    fluid.getDescription().copy().withStyle(ChatFormatting.AQUA)
                         .append(Component.literal(" * ").withStyle(ChatFormatting.WHITE))
                         .append(Component.literal("" + count).withStyle(ChatFormatting.LIGHT_PURPLE))
                 );
