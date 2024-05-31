@@ -97,6 +97,7 @@ public class CraftingIOBufferPartMachine extends MEPartMachine implements ICraft
     @Persisted
     private int lockedSlot;
     private boolean isOutputting;
+    private boolean hasCached;
     private boolean needPatternSync = true;
     protected List<Runnable> listeners = new ArrayList<>();
     protected Object2LongOpenHashMap<AEFluidKey> returnFluidMap = new Object2LongOpenHashMap<>();
@@ -122,6 +123,7 @@ public class CraftingIOBufferPartMachine extends MEPartMachine implements ICraft
     public boolean afterWorking(IWorkableMultiController controller) {
         this.isOutputting = true;
         this.lockedRecipeId = null;
+        this.hasCached = false;
         return super.afterWorking(controller);
     }
 
@@ -186,8 +188,9 @@ public class CraftingIOBufferPartMachine extends MEPartMachine implements ICraft
     public List<Ingredient> handleItemInner(GTRecipe recipe, List<Ingredient> left, boolean simulate) {
         if (recipe.id.equals(lockedRecipeId) && lockedSlot >= 0) {
             left = internalInventory[lockedSlot].handleItemInternal(left, simulate);
-            if (left == null && !simulate) {
-                cacheItemOutput(recipe);
+            if (!hasCached && left == null && !simulate) {
+                cacheRecipeOutput(recipe);
+                this.hasCached = true;
             }
             return left;
         } else {
@@ -197,7 +200,10 @@ public class CraftingIOBufferPartMachine extends MEPartMachine implements ICraft
                 if (internalInventory[i].isItemEmpty()) continue;
                 contents = internalInventory[i].handleItemInternal(contents, simulate);
                 if (contents == null) {
-                    if (!simulate) cacheItemOutput(recipe);
+                    if (!hasCached && !simulate) {
+                        cacheRecipeOutput(recipe);
+                        this.hasCached = true;
+                    }
                     this.lockedSlot = i;
                     return contents;
                 }
@@ -208,19 +214,26 @@ public class CraftingIOBufferPartMachine extends MEPartMachine implements ICraft
         }
     }
 
-    private void cacheItemOutput(GTRecipe recipe) {
+    private void cacheRecipeOutput(GTRecipe recipe) {
         this.returnItemMap.clear();
         for (ItemStack stack : MORecipeHelper.getOutputItem(recipe)) {
             var key = AEItemKey.of(stack.getItem(), stack.getTag());
             returnItemMap.mergeLong(key, stack.getCount(), Long::sum);
+        }
+
+        this.returnFluidMap.clear();
+        for (FluidStack stack : MORecipeHelper.getOutputFluid(recipe)) {
+            var key = AEFluidKey.of(stack.getFluid(), stack.getTag());
+            returnFluidMap.mergeLong(key, stack.getAmount(), Long::sum);
         }
     }
 
     public List<FluidIngredient> handleFluidInner(GTRecipe recipe, List<FluidIngredient> left, boolean simulate) {
         if (recipe.id.equals(lockedRecipeId) && lockedSlot >= 0) {
             left = internalInventory[lockedSlot].handleFluidInternal(left, simulate);
-            if (left == null && !simulate) {
-                cacheFluidOutput(recipe);
+            if (!hasCached && left == null && !simulate) {
+                cacheRecipeOutput(recipe);
+                this.hasCached = true;
             }
             return left;
         } else {
@@ -230,7 +243,10 @@ public class CraftingIOBufferPartMachine extends MEPartMachine implements ICraft
                 if (internalInventory[i].isFluidEmpty()) continue;
                 contents = internalInventory[i].handleFluidInternal(contents, simulate);
                 if (contents == null) {
-                    if (!simulate) cacheFluidOutput(recipe);
+                    if (!hasCached && !simulate) {
+                        cacheRecipeOutput(recipe);
+                        this.hasCached = true;
+                    }
                     this.lockedSlot = i;
                     return contents;
                 }
@@ -238,14 +254,6 @@ public class CraftingIOBufferPartMachine extends MEPartMachine implements ICraft
             }
             this.lockedSlot = -1;
             return left;
-        }
-    }
-
-    private void cacheFluidOutput(GTRecipe recipe) {
-        this.returnFluidMap.clear();
-        for (FluidStack stack : MORecipeHelper.getOutputFluid(recipe)) {
-            var key = AEFluidKey.of(stack.getFluid(), stack.getTag());
-            returnFluidMap.mergeLong(key, stack.getAmount(), Long::sum);
         }
     }
 
@@ -388,6 +396,11 @@ public class CraftingIOBufferPartMachine extends MEPartMachine implements ICraft
     public void onChanged() {
         super.onChanged();
         this.updateSubscription();
+    }
+
+    @Override
+    public boolean canShared() {
+        return false;
     }
 
     @Override
