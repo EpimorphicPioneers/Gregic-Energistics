@@ -5,7 +5,6 @@ import com.epimorphismmc.monomorphism.datagen.lang.MOLangProvider;
 import java.util.List;
 
 import static com.epimorphismmc.gregiceng.common.data.GEMachines.*;
-import static com.gregtechceu.gtceu.common.data.GTMachines.ELECTRIC_TIERS;
 import static com.gregtechceu.gtceu.common.data.GTMachines.MULTI_HATCH_TIERS;
 
 public class GELangHandler {
@@ -13,9 +12,9 @@ public class GELangHandler {
     private GELangHandler() {/**/}
 
     public static void init(MOLangProvider provider) {
-        provider.addBlockWithTooltip(CRAFTING_INPUT_BUFFER::getBlock,
-                "ME Crafting Input Buffer",
-                "ME样板输入总成",
+        provider.addBlockWithTooltip(CRAFTING_IO_BUFFER::getBlock,
+                "ME Crafting IO Buffer",
+                "ME样板IO总成",
                 List.of(
 
                 ),
@@ -27,6 +26,11 @@ public class GELangHandler {
         provider.addBlockWithTooltip("input_buffer",
                 "Item and Fluid Input for Multiblocks",
                 "为多方块结构输入物品和流体");
+
+        provider.addTieredMachineName("output_buffer", "输出总成", MULTI_HATCH_TIERS);
+        provider.addBlockWithTooltip("output_buffer",
+                "Item and Fluid Output for Multiblocks",
+                "为多方块结构输出物品和流体");
 
         provider.add("gui.gregiceng.share_inventory.title",
                 "Share Inventory",

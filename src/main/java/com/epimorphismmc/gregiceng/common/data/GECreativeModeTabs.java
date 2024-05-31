@@ -11,7 +11,7 @@ public class GECreativeModeTabs {
     public final static RegistryEntry<CreativeModeTab> MAIN = registrate().defaultCreativeTab("main",
                     builder -> builder.displayItems(new GTCreativeModeTabs.RegistrateDisplayItemsGenerator("main", registrate()))
                             .title(registrate().addLang("itemGroup", GregicEng.id("main"), GregicEng.NAME))
-                            .icon(GEMachines.CRAFTING_INPUT_BUFFER::asStack)
+                            .icon(GEMachines.CRAFTING_IO_BUFFER::asStack)
                             .build())
             .register();
 
