@@ -54,9 +54,5 @@ jobs:
           loaders: forge
 
           github-token: ${{ secrets.GITHUB_TOKEN }}
-
-          modrinth-id: AABBCCDD
           modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
-
-          curseforge-id: 114514
           curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}

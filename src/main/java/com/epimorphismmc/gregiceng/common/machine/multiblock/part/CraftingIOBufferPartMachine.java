@@ -674,7 +674,7 @@ public class CraftingIOBufferPartMachine extends MEPartMachine implements ICraft
             isOutputting = false;
             circuitInventory.handleRecipeInner(io, recipe, left, slotName, simulate);
             left = handleItemInner(recipe, left, simulate);
-            return shareInventory.handleRecipeInner(io, recipe, left, slotName, simulate);
+            return left != null ? shareInventory.handleRecipeInner(io, recipe, left, slotName, simulate) : null;
         }
 
         @Override
@@ -727,7 +727,7 @@ public class CraftingIOBufferPartMachine extends MEPartMachine implements ICraft
             if (io != IO.IN) return left;
             isOutputting = false;
             left = handleFluidInner(recipe, left, simulate);
-            return shareTank.handleRecipeInner(io, recipe, left, slotName, simulate);
+            return left != null ? shareTank.handleRecipeInner(io, recipe, left, slotName, simulate) : null;
         }
 
         @Override
