@@ -1,11 +1,10 @@
 package com.epimorphismmc.gregiceng.data.recipe.misc;
 
+import appeng.core.definitions.AEBlocks;
 import appeng.core.definitions.AEItems;
-import appeng.core.definitions.AEParts;
 import com.epimorphismmc.gregiceng.common.data.GEMachines;
 import com.epimorphismmc.gregiceng.data.recipe.GECraftingComponents;
 import com.gregtechceu.gtceu.api.GTValues;
-import com.gregtechceu.gtceu.common.data.GTItems;
 import com.gregtechceu.gtceu.common.data.GTMaterials;
 import com.gregtechceu.gtceu.data.recipe.CustomTags;
 import net.minecraft.data.recipes.FinishedRecipe;
@@ -34,8 +33,8 @@ public class MachineRecipeLoader {
 
         ASSEMBLER_RECIPES.recipeBuilder("crafting_input_buffer")
                 .inputItems(GEMachines.INPUT_BUFFER[GTValues.LuV].asStack())
-                .inputItems(AEParts.INTERFACE.stack(3))
-                .inputItems(AEParts.PATTERN_PROVIDER.stack(3))
+                .inputItems(AEBlocks.INTERFACE.stack(3))
+                .inputItems(AEBlocks.PATTERN_PROVIDER.stack(3))
                 .inputItems(AEItems.SPEED_CARD.stack(2))
                 .inputItems(AEItems.CAPACITY_CARD.stack(2))
                 .inputItems(CustomTags.LuV_CIRCUITS)
