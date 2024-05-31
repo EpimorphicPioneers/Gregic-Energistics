@@ -217,17 +217,17 @@ public class BufferPartMachine extends TieredIOPartMachine implements IDistinctP
 
         int index = 0;
         for (int y = 0; y < tanks; y++) {
-            container.addWidget(new TankWidget(tank.getStorages()[index++], 4, 4 + y * 18,
-                    true, io.support(IO.IN))
-                    .setBackground(GuiTextures.FLUID_SLOT));
+            for (int x = 0; x < tanks; x++) {
+                container.addWidget(new SlotWidget(getInventory().storage, index++, 4 + x * 18, 4 + y * 18, true, io.support(IO.IN))
+                        .setBackgroundTexture(GuiTextures.SLOT).setIngredientIO(this.io == IO.IN ? IngredientIO.INPUT : IngredientIO.OUTPUT));
+            }
         }
 
         index = 0;
         for (int y = 0; y < tanks; y++) {
-            for (int x = 0; x < tanks; x++) {
-                container.addWidget(new SlotWidget(getInventory().storage, index++, 4 + (x + 1) * 18, 4 + y * 18, true, io.support(IO.IN))
-                        .setBackgroundTexture(GuiTextures.SLOT).setIngredientIO(this.io == IO.IN ? IngredientIO.INPUT : IngredientIO.OUTPUT));
-            }
+            container.addWidget(new TankWidget(tank.getStorages()[index++], 4 + tanks * 18, 4 + y * 18,
+                    true, io.support(IO.IN))
+                    .setBackground(GuiTextures.FLUID_SLOT));
         }
 
         container.setBackground(GuiTextures.BACKGROUND_INVERSE);

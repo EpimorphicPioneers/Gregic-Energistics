@@ -72,10 +72,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class CraftingInputBufferPartMachine extends MEPartMachine implements ICraftingProvider {
-
     protected static final ManagedFieldHolder MANAGED_FIELD_HOLDER = new ManagedFieldHolder(CraftingInputBufferPartMachine.class, MEPartMachine.MANAGED_FIELD_HOLDER);
-
-    private static final int MAX_PATTERN_COUNT = 4 * 9;
+    private static final int MAX_PATTERN_COUNT = 6 * 9;
 
     @Getter
     @Persisted
@@ -93,7 +91,7 @@ public class CraftingInputBufferPartMachine extends MEPartMachine implements ICr
     private final InternalSlot[] internalInventory = new InternalSlot[MAX_PATTERN_COUNT];
     private final BiMap<IPatternDetails, InternalSlot> patternDetailsPatternSlotMap = HashBiMap.create(MAX_PATTERN_COUNT);
     @Persisted
-    private ResourceLocation lockedRecipeId; // TODO 在配方结束后我们应该解除锁定，以防存在相同的样板
+    private ResourceLocation lockedRecipeId;
     @Persisted
     private int lockedSlot;
     private boolean isOutputting;
@@ -121,6 +119,7 @@ public class CraftingInputBufferPartMachine extends MEPartMachine implements ICr
     @Override
     public boolean afterWorking(IWorkableMultiController controller) {
         this.isOutputting = true;
+        this.lockedRecipeId = null;
         return super.afterWorking(controller);
     }
 
@@ -182,39 +181,6 @@ public class CraftingInputBufferPartMachine extends MEPartMachine implements ICr
         returnItemMap.clear();
     }
 
-//        protected void autoIO() {
-//        if (getLevel().isClientSide) return;
-//        if (!this.isWorkingEnabled()) return;
-//        if (!this.shouldSyncME()) return;
-//
-//        if (this.updateMEStatus()) {
-//            if (!this.internalBuffer.isEmpty()) {
-//                MEStorage aeNetwork = this.getMainNode().getGrid().getStorageService().getInventory();
-//                for (int slot = 0; slot < this.internalBuffer.size(); ++slot) {
-//                    GenericStack item = this.internalBuffer.getStack(slot);
-//                    if (item == null) continue;
-//                    long inserted = aeNetwork.insert(item.what(), item.amount(), Actionable.MODULATE, this.actionSource);
-//                    if (inserted > 0) {
-//                        item = new GenericStack(item.what(), (item.amount() - inserted));
-//                    }
-//                    this.internalBuffer.setStack(slot, item);
-//                }
-//            }
-//            this.updateTankSubscription();
-//        }
-//    }
-//
-//    @Override
-//    protected void updateTankSubscription() {
-//        if (isWorkingEnabled() && !internalBuffer.isEmpty() && this.getLevel() != null
-//                && GridHelper.getNodeHost(getLevel(), getPos().relative(getFrontFacing())) != null) {
-//            autoIOSubs = subscribeServerTick(autoIOSubs, this::autoIO);
-//        } else if (autoIOSubs != null) {
-//            autoIOSubs.unsubscribe();
-//            autoIOSubs = null;
-//        }
-//    }
-
     public List<Ingredient> handleItemInner(GTRecipe recipe, List<Ingredient> left, boolean simulate) {
         if (recipe.id.equals(lockedRecipeId) && lockedSlot >= 0) {
             left = internalInventory[lockedSlot].handleItemInternal(left, simulate);
@@ -226,6 +192,7 @@ public class CraftingInputBufferPartMachine extends MEPartMachine implements ICr
             this.lockedRecipeId = recipe.id;
             List<Ingredient> contents = copyIngredients(left);
             for (int i = 0; i < internalInventory.length; i++) {
+                if (internalInventory[i].isItemEmpty()) continue;
                 contents = internalInventory[i].handleItemInternal(contents, simulate);
                 if (contents == null) {
                     if (!simulate) cacheItemOutput(recipe);
@@ -247,7 +214,6 @@ public class CraftingInputBufferPartMachine extends MEPartMachine implements ICr
         }
     }
 
-    // TODO 配方检测跳过空Slot
     public List<FluidIngredient> handleFluidInner(GTRecipe recipe, List<FluidIngredient> left, boolean simulate) {
         if (recipe.id.equals(lockedRecipeId) && lockedSlot >= 0) {
             left = internalInventory[lockedSlot].handleFluidInternal(left, simulate);
@@ -259,6 +225,7 @@ public class CraftingInputBufferPartMachine extends MEPartMachine implements ICr
             this.lockedRecipeId = recipe.id;
             List<FluidIngredient> contents = copyFluidIngredients(left);
             for (int i = 0; i < internalInventory.length; i++) {
+                if (internalInventory[i].isFluidEmpty()) continue;
                 contents = internalInventory[i].handleFluidInternal(contents, simulate);
                 if (contents == null) {
                     if (!simulate) cacheFluidOutput(recipe);
@@ -311,7 +278,7 @@ public class CraftingInputBufferPartMachine extends MEPartMachine implements ICr
     @Override
     public Widget createUIWidget() {
         int rowSize = 9;
-        int colSize = 4;
+        int colSize = 6;
         var group = new WidgetGroup(0, 0, 18 * rowSize + 16, 18 * colSize + 16);
         int index = 0;
         for (int y = 0; y < colSize; ++y) {
@@ -342,6 +309,7 @@ public class CraftingInputBufferPartMachine extends MEPartMachine implements ICr
 
     @Override
     public void attachConfigurators(ConfiguratorPanel configuratorPanel) {
+        super.attachConfigurators(configuratorPanel);
         configuratorPanel.attachConfigurators(new ButtonConfigurator(new GuiTextureGroup(GuiTextures.BUTTON, GEGuiTextures.REFUND_OVERLAY), this::refundAll)
                 .setTooltips(List.of(Component.translatable("gui.gregiceng.refund_all.desc"))));
         configuratorPanel.attachConfigurators(new CircuitFancyConfigurator(circuitInventory.storage));
@@ -448,34 +416,61 @@ public class CraftingInputBufferPartMachine extends MEPartMachine implements ICr
         @Setter
         protected Runnable onContentsChanged = () -> {/**/};
 
-        private final List<ItemStack> itemInventory; //TODO 合并相同的Item
-        private final List<FluidStack> fluidInventory; //TODO 合并相同的Fluid
+        private final Set<ItemStack> itemInventory;
+        private final Set<FluidStack> fluidInventory;
 
         public InternalSlot() {
-            this.itemInventory = new ArrayList<>();
-            this.fluidInventory = new ArrayList<>();
+            this.itemInventory = new HashSet<>();
+            this.fluidInventory = new HashSet<>();
         }
 
-        private boolean isEmpty() {
-            // if one item / fluid is empty then it should be safe to assume all other is empty,
-            // or at least won't require a recipe check, as long as the pattern is sane
-            if (!itemInventory.isEmpty()) {
-                return itemInventory.get(0) == null || itemInventory.get(0).isEmpty();
-            }
+        public boolean isItemEmpty() {
+            return itemInventory.isEmpty();
+        }
 
-            if (!fluidInventory.isEmpty()) {
-                return fluidInventory.get(0) == null || fluidInventory.get(0).isEmpty();
+        public boolean isFluidEmpty() {
+            return fluidInventory.isEmpty();
+        }
+
+        private void addItem(AEItemKey key, long amount) {
+            if (amount <= 0L) return;
+            for (ItemStack item : itemInventory) {
+                if (key.matches(item)) {
+                    long sum = item.getCount() + amount;
+                    if (sum <= Integer.MAX_VALUE) {
+                        item.grow((int) amount);
+                    } else {
+                        itemInventory.remove(item);
+                        itemInventory.addAll(List.of(AEUtils.toItemStacks(key, sum)));
+                    }
+                    return;
+                }
             }
-            return true;
+            itemInventory.addAll(List.of(AEUtils.toItemStacks(key, amount)));
+        }
+
+        private void addFluid(AEFluidKey key, long amount) {
+            if (amount <= 0L) return;
+            for (FluidStack fluid : fluidInventory) {
+                if (AEUtils.matches(key, fluid)) {
+                    long free = Long.MAX_VALUE - fluid.getAmount();
+                    if (amount <= free) {
+                        fluid.grow(amount);
+                    } else {
+                        fluid.setAmount(Long.MAX_VALUE);
+                        fluidInventory.add(AEUtils.toFluidStack(key, amount - free));
+                    }
+                    return;
+                }
+            }
+            fluidInventory.add(AEUtils.toFluidStack(key, amount));
         }
 
         public ItemStack[] getItemInputs() {
-//            if (isEmpty()) return new ItemStack[0];
-            return ArrayUtils.addAll(itemInventory.toArray(new ItemStack[0])/*, sharedItemGetter.getSharedItem()*/);
+            return ArrayUtils.addAll(itemInventory.toArray(new ItemStack[0]));
         }
 
         public FluidStack[] getFluidInputs() {
-//            if (isEmpty()) return new FluidStack[0];
             return fluidInventory.toArray(new FluidStack[0]);
         }
 
@@ -496,6 +491,9 @@ public class CraftingInputBufferPartMachine extends MEPartMachine implements ICr
                             actionSource);
                     if (inserted > 0) {
                         stack.shrink((int) inserted);
+                        if (stack.isEmpty()) {
+                            itemInventory.remove(stack);
+                        }
                     }
                 }
 
@@ -508,6 +506,9 @@ public class CraftingInputBufferPartMachine extends MEPartMachine implements ICr
                             stack.getAmount(), actionSource);
                     if (inserted > 0) {
                         stack.shrink(inserted);
+                        if (stack.isEmpty()) {
+                            fluidInventory.remove(stack);
+                        }
                     }
                 }
                 onContentsChanged.run();
@@ -517,11 +518,11 @@ public class CraftingInputBufferPartMachine extends MEPartMachine implements ICr
         public void pushPattern(IPatternDetails patternDetails, KeyCounter[] inputHolder) {
             patternDetails.pushInputsToExternalInventory(inputHolder, (what, amount) -> {
                 if (what instanceof AEFluidKey key) {
-                    fluidInventory.add(AEUtils.toFluidStack(key, amount));
+                    addFluid(key, amount);
                 }
 
                 if (what instanceof AEItemKey key) {
-                    itemInventory.addAll(List.of(AEUtils.toItemStacks(key, amount)));
+                    addItem(key, amount);
                 }
             });
             onContentsChanged.run();
@@ -532,14 +533,17 @@ public class CraftingInputBufferPartMachine extends MEPartMachine implements ICr
             while (iterator.hasNext()) {
                 Ingredient ingredient = iterator.next();
                 SLOT_LOOKUP:
-                for (ItemStack stack : itemInventory) {
+                for (ItemStack stack : itemInventory) { // TODO 改变循环的的次序，这在大数量检测时是有用的
                     if (ingredient.test(stack)) {
                         ItemStack[] ingredientStacks = ingredient.getItems();
                         for (ItemStack ingredientStack : ingredientStacks) {
                             if (ingredientStack.is(stack.getItem())) {
                                 int extracted = Math.min(ingredientStack.getCount(), stack.getCount());
                                 if (!simulate) {
-                                    stack.shrink(extracted); // TODO 把空的ItemStack移除
+                                    stack.shrink(extracted);
+                                    if (stack.isEmpty()) {
+                                        itemInventory.remove(stack);
+                                    }
                                     onContentsChanged.run();
                                 }
                                 ingredientStack.shrink(extracted);
@@ -576,7 +580,10 @@ public class CraftingInputBufferPartMachine extends MEPartMachine implements ICr
                 if (!found) continue;
                 long drained = Math.min(foundStack.getAmount(), fluidStack.getAmount());
                 if (!simulate) {
-                    foundStack.shrink(drained); // TODO 把空的FluidStack移除
+                    foundStack.shrink(drained);
+                    if (foundStack.isEmpty()) {
+                        fluidInventory.remove(foundStack);
+                    }
                     onContentsChanged.run();
                 }
 
