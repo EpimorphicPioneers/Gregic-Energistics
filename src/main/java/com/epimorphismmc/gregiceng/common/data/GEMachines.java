@@ -26,14 +26,14 @@ public class GEMachines {
     }
 
     public final static MachineDefinition CRAFTING_INPUT_BUFFER = registrate().machine("crafting_input_buffer", CraftingInputBufferPartMachine::new)
-            .tier(UV)
+            .tier(LuV)
             .rotationState(RotationState.ALL)
             .abilities(PartAbility.IMPORT_ITEMS, PartAbility.IMPORT_FLUIDS, PartAbility.EXPORT_ITEMS, PartAbility.EXPORT_FLUIDS)
             .overlayTieredHullRenderer("crafting_input_buffer")
             .tooltips(Component.translatable("block.gregiceng.crafting_input_buffer.desc.0"))
             .register();
 
-    public static final MachineDefinition[] ITEM_IMPORT_BUS = registerTieredGEMachines("input_buffer",
+    public static final MachineDefinition[] INPUT_BUFFER = registerTieredGEMachines("input_buffer",
             (holder, tier) -> new BufferPartMachine(holder, tier, IO.IN),
             (tier, builder) -> builder
                     .langValue(VNF[tier] + " Input Buffer")

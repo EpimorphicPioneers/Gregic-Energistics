@@ -105,7 +105,7 @@ public class CraftingInputBufferPartMachine extends MEPartMachine implements ICr
     protected TickableSubscription updateSubs;
 
     public CraftingInputBufferPartMachine(IMachineBlockEntity holder, Object... args) {
-        super(holder, GTValues.UV, IO.BOTH, args);
+        super(holder, GTValues.LuV, IO.BOTH, args);
         this.patternInventory.setFilter(stack -> stack.getItem() instanceof ProcessingPatternItem);
         for (int i = 0; i < this.internalInventory.length; i++) {
             this.internalInventory[i] = new InternalSlot();
