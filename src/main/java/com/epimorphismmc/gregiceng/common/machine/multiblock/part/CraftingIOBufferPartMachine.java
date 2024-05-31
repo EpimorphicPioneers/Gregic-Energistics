@@ -341,7 +341,7 @@ public class CraftingIOBufferPartMachine extends MEPartMachine implements ICraft
     public void setFrontFacing(Direction facing) {
         super.setFrontFacing(facing);
         if (isRemote()) return;
-        getMainNode().setExposedOnSides(EnumSet.of(this.getFrontFacing()));
+        this.getMainNode().setExposedOnSides(EnumSet.of(facing));
     }
 
     @Override
