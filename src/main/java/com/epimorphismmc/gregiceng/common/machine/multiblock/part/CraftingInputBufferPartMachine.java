@@ -140,7 +140,7 @@ public class CraftingInputBufferPartMachine extends MEPartMachine implements ICr
     }
 
     protected void updateSubscription() {
-        if (GridHelper.getNodeHost(getLevel(), getPos().relative(getFrontFacing())) != null) {
+        if (getLevel() != null && GridHelper.getNodeHost(getLevel(), getPos().relative(getFrontFacing())) != null) {
             updateSubs = subscribeServerTick(updateSubs, this::update);
         } else if (updateSubs != null) {
             updateSubs.unsubscribe();

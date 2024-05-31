@@ -1,4 +1,4 @@
-package com.epimorphismmc.gregiceng.data;
+package com.epimorphismmc.gregiceng.data.lang;
 
 import com.epimorphismmc.monomorphism.datagen.lang.MOLangProvider;
 

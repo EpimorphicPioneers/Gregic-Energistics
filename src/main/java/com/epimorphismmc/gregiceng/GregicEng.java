@@ -3,7 +3,7 @@ package com.epimorphismmc.gregiceng;
 import com.epimorphismmc.gregiceng.client.ClientProxy;
 import com.epimorphismmc.gregiceng.common.CommonProxy;
 import com.epimorphismmc.gregiceng.config.GEConfigHolder;
-import com.epimorphismmc.gregiceng.data.GELangHandler;
+import com.epimorphismmc.gregiceng.data.lang.GELangHandler;
 import com.epimorphismmc.monomorphism.MOMod;
 import com.epimorphismmc.monomorphism.datagen.MOProviderTypes;
 import com.epimorphismmc.monomorphism.registry.registrate.MORegistrate;
