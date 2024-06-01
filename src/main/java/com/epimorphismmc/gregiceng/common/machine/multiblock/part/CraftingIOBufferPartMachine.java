@@ -2,15 +2,20 @@ package com.epimorphismmc.gregiceng.common.machine.multiblock.part;
 
 import appeng.api.crafting.IPatternDetails;
 import appeng.api.crafting.PatternDetailsHelper;
+import appeng.api.implementations.blockentities.PatternContainerGroup;
+import appeng.api.inventories.InternalInventory;
 import appeng.api.networking.GridHelper;
+import appeng.api.networking.IGrid;
 import appeng.api.networking.crafting.ICraftingProvider;
 import appeng.api.stacks.*;
 import appeng.api.storage.MEStorage;
 import appeng.api.storage.StorageHelper;
 import appeng.crafting.pattern.EncodedPatternItem;
 import appeng.crafting.pattern.ProcessingPatternItem;
+import appeng.helpers.patternprovider.PatternContainer;
 import com.epimorphismmc.gregiceng.GregicEng;
 import com.epimorphismmc.gregiceng.api.gui.GEGuiTextures;
+import com.epimorphismmc.gregiceng.common.data.GEMachines;
 import com.epimorphismmc.monomorphism.ae2.AEUtils;
 import com.epimorphismmc.monomorphism.ae2.MEPartMachine;
 import com.epimorphismmc.monomorphism.machine.fancyconfigurator.ButtonConfigurator;
@@ -28,6 +33,7 @@ import com.gregtechceu.gtceu.api.capability.recipe.RecipeCapability;
 import com.gregtechceu.gtceu.api.gui.GuiTextures;
 import com.gregtechceu.gtceu.api.gui.fancy.ConfiguratorPanel;
 import com.gregtechceu.gtceu.api.machine.IMachineBlockEntity;
+import com.gregtechceu.gtceu.api.machine.MultiblockMachineDefinition;
 import com.gregtechceu.gtceu.api.machine.TickableSubscription;
 import com.gregtechceu.gtceu.api.machine.fancyconfigurator.CircuitFancyConfigurator;
 import com.gregtechceu.gtceu.api.machine.feature.multiblock.IMultiController;
@@ -50,6 +56,7 @@ import com.lowdragmc.lowdraglib.side.fluid.FluidStack;
 import com.lowdragmc.lowdraglib.syncdata.IContentChangeAware;
 import com.lowdragmc.lowdraglib.syncdata.ISubscription;
 import com.lowdragmc.lowdraglib.syncdata.ITagSerializable;
+import com.lowdragmc.lowdraglib.syncdata.annotation.DescSynced;
 import com.lowdragmc.lowdraglib.syncdata.annotation.Persisted;
 import com.lowdragmc.lowdraglib.syncdata.field.ManagedFieldHolder;
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
@@ -72,13 +79,29 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class CraftingIOBufferPartMachine extends MEPartMachine implements ICraftingProvider {
+public class CraftingIOBufferPartMachine extends MEPartMachine implements ICraftingProvider, PatternContainer {
     protected static final ManagedFieldHolder MANAGED_FIELD_HOLDER = new ManagedFieldHolder(CraftingIOBufferPartMachine.class, MEPartMachine.MANAGED_FIELD_HOLDER);
     private static final int MAX_PATTERN_COUNT = 6 * 9;
 
     @Getter
     @Persisted
     private final ItemStackTransfer patternInventory = new ItemStackTransfer(MAX_PATTERN_COUNT);
+    private final InternalInventory internalPatternInventory = new InternalInventory() {
+        @Override
+        public int size() {
+            return MAX_PATTERN_COUNT;
+        }
+
+        @Override
+        public ItemStack getStackInSlot(int slotIndex) {
+            return patternInventory.getStackInSlot(slotIndex);
+        }
+
+        @Override
+        public void setItemDirect(int slotIndex, ItemStack stack) {
+            patternInventory.setStackInSlot(slotIndex, stack);
+        }
+    };
     @Getter
     @Persisted
     protected final NotifiableItemStackHandler circuitInventory;
@@ -96,6 +119,9 @@ public class CraftingIOBufferPartMachine extends MEPartMachine implements ICraft
     private ResourceLocation lockedRecipeId;
     @Persisted
     private int lockedSlot;
+    @DescSynced
+    @Persisted
+    private String customName = "";
     private boolean isOutputting;
     private boolean hasCached;
     private boolean needPatternSync = true;
@@ -166,9 +192,9 @@ public class CraftingIOBufferPartMachine extends MEPartMachine implements ICraft
                 var key = entry.getKey();
                 var amount = entry.getLongValue();
                 long inserted = StorageHelper.poweredInsert(
-                        getMainNode().getGrid().getEnergyService(), aeNetwork,
-                        key, amount,
-                        actionSource);
+                    getMainNode().getGrid().getEnergyService(), aeNetwork,
+                    key, amount,
+                    actionSource);
                 if (inserted >= amount) {
                     returnBuffer.removeLong(key);
                 } else {
@@ -295,24 +321,24 @@ public class CraftingIOBufferPartMachine extends MEPartMachine implements ICraft
             for (int x = 0; x < rowSize; ++x) {
                 int finalI = index;
                 var slot = new SlotWidget(patternInventory, index++, 8 + x * 18, 14 + y * 18)
-                        .setItemHook(stack -> {
-                            if (!stack.isEmpty() && stack.getItem() instanceof EncodedPatternItem iep) {
-                                final ItemStack out = iep.getOutput(stack);
-                                if (!out.isEmpty()) {
-                                    return out;
-                                }
+                    .setItemHook(stack -> {
+                        if (!stack.isEmpty() && stack.getItem() instanceof EncodedPatternItem iep) {
+                            final ItemStack out = iep.getOutput(stack);
+                            if (!out.isEmpty()) {
+                                return out;
                             }
-                            return stack;
-                        })
-                        .setChangeListener(() -> onPatternChange(finalI))
-                        .setBackground(GuiTextures.SLOT, GEGuiTextures.PATTERN_OVERLAY);
+                        }
+                        return stack;
+                    })
+                    .setChangeListener(() -> onPatternChange(finalI))
+                    .setBackground(GuiTextures.SLOT, GEGuiTextures.PATTERN_OVERLAY);
                 group.addWidget(slot);
             }
         }
         // ME Network status
         group.addWidget(new LabelWidget(8, 2, () -> this.isOnline ?
-                "gtceu.gui.me_network.online" :
-                "gtceu.gui.me_network.offline"));
+            "gtceu.gui.me_network.online" :
+            "gtceu.gui.me_network.offline"));
 
         return group;
     }
@@ -321,12 +347,12 @@ public class CraftingIOBufferPartMachine extends MEPartMachine implements ICraft
     public void attachConfigurators(ConfiguratorPanel configuratorPanel) {
         super.attachConfigurators(configuratorPanel);
         configuratorPanel.attachConfigurators(new ButtonConfigurator(new GuiTextureGroup(GuiTextures.BUTTON, GEGuiTextures.REFUND_OVERLAY), this::refundAll)
-                .setTooltips(List.of(Component.translatable("gui.gregiceng.refund_all.desc"))));
+            .setTooltips(List.of(Component.translatable("gui.gregiceng.refund_all.desc"))));
         configuratorPanel.attachConfigurators(new CircuitFancyConfigurator(circuitInventory.storage));
         configuratorPanel.attachConfigurators(new InventoryFancyConfigurator(shareInventory.storage, Component.translatable("gui.gregiceng.share_inventory.title"))
-                .setTooltips(List.of(Component.translatable("gui.gregiceng.share_inventory.desc"))));
+            .setTooltips(List.of(Component.translatable("gui.gregiceng.share_inventory.desc"))));
         configuratorPanel.attachConfigurators(new TankFancyConfigurator(shareTank.getStorages(), Component.translatable("gui.gregiceng.share_tank.title"))
-                .setTooltips(List.of(Component.translatable("gui.gregiceng.share_tank.desc"))));
+            .setTooltips(List.of(Component.translatable("gui.gregiceng.share_tank.desc"))));
     }
 
     private void onPatternChange(int index) {
@@ -355,15 +381,15 @@ public class CraftingIOBufferPartMachine extends MEPartMachine implements ICraft
     @Override
     public List<IPatternDetails> getAvailablePatterns() {
         return patternDetailsPatternSlotMap.keySet().stream()
-                .filter(Objects::nonNull)
-                .toList();
+            .filter(Objects::nonNull)
+            .toList();
     }
 
     @Override
     public boolean pushPattern(IPatternDetails patternDetails, KeyCounter[] inputHolder) {
         if (!getMainNode().isActive()
-                || !patternDetailsPatternSlotMap.containsKey(patternDetails)
-                || !checkInput(inputHolder)) {
+            || !patternDetailsPatternSlotMap.containsKey(patternDetails)
+            || !checkInput(inputHolder)) {
             return false;
         }
 
@@ -379,9 +405,9 @@ public class CraftingIOBufferPartMachine extends MEPartMachine implements ICraft
     private boolean checkInput(KeyCounter[] inputHolder) {
         for (KeyCounter input : inputHolder) {
             var illegal = input.keySet().stream()
-                    .map(AEKey::getType)
-                    .map(AEKeyType::getId)
-                    .anyMatch(id -> !id.equals(AEKeyType.items().getId()) && !id.equals(AEKeyType.fluids().getId()));
+                .map(AEKey::getType)
+                .map(AEKeyType::getId)
+                .anyMatch(id -> !id.equals(AEKeyType.items().getId()) && !id.equals(AEKeyType.fluids().getId()));
             if (illegal) return false;
         }
         return true;
@@ -429,6 +455,62 @@ public class CraftingIOBufferPartMachine extends MEPartMachine implements ICraft
         super.saveCustomPersistedData(tag, forDrop);
         if (!forDrop) {
 
+        }
+    }
+
+    @Override
+    public @Nullable IGrid getGrid() {
+        return getMainNode().getGrid();
+    }
+
+    @Override
+    public InternalInventory getTerminalPatternInventory() {
+        return internalPatternInventory;
+    }
+
+    @Override
+    public PatternContainerGroup getTerminalGroup() {
+        List<IMultiController> controllers = getControllers();
+        // has controller
+        if (!controllers.isEmpty()) {
+            IMultiController controller = controllers.get(0);
+            MultiblockMachineDefinition controllerDefinition = controller.self().getDefinition();
+            // has customName
+            if (!customName.isEmpty()) {
+                return new PatternContainerGroup(
+                    AEItemKey.of(controllerDefinition.asStack()),
+                    Component.literal(customName),
+                    List.of()
+                );
+            } else {
+                ItemStack circuitStack = circuitInventory.storage.getStackInSlot(0);
+                int circuitConfiguration = circuitStack.isEmpty() ? -1 : IntCircuitBehaviour.getCircuitConfiguration(circuitStack);
+
+                Component groupName = circuitConfiguration != -1
+                    ? Component.translatable(controllerDefinition.getDescriptionId()).append(" - " + circuitConfiguration)
+                    : Component.translatable(controllerDefinition.getDescriptionId());
+
+                return new PatternContainerGroup(
+                    AEItemKey.of(controllerDefinition.asStack()),
+                    groupName,
+                    List.of()
+                );
+            }
+        } else {
+            // has customName
+            if (!customName.isEmpty()) {
+                return new PatternContainerGroup(
+                    AEItemKey.of(GEMachines.CRAFTING_IO_BUFFER.asStack()),
+                    Component.literal(customName),
+                    List.of()
+                );
+            } else {
+                return new PatternContainerGroup(
+                    AEItemKey.of(GEMachines.CRAFTING_IO_BUFFER.asStack()),
+                    GEMachines.CRAFTING_IO_BUFFER.get().getDefinition().getItem().getDescription(),
+                    List.of()
+                );
+            }
         }
     }
 
@@ -508,9 +590,9 @@ public class CraftingIOBufferPartMachine extends MEPartMachine implements ICraft
                     if (key == null) continue;
 
                     long inserted = StorageHelper.poweredInsert(
-                            energy, networkInv,
-                            key, stack.getCount(),
-                            actionSource);
+                        energy, networkInv,
+                        key, stack.getCount(),
+                        actionSource);
                     if (inserted > 0) {
                         stack.shrink((int) inserted);
                         if (stack.isEmpty()) {
@@ -523,9 +605,9 @@ public class CraftingIOBufferPartMachine extends MEPartMachine implements ICraft
                     if (stack == null || stack.isEmpty()) continue;
 
                     long inserted = StorageHelper.poweredInsert(
-                            energy, networkInv,
-                            AEFluidKey.of(stack.getFluid(), stack.getTag()),
-                            stack.getAmount(), actionSource);
+                        energy, networkInv,
+                        AEFluidKey.of(stack.getFluid(), stack.getTag()),
+                        stack.getAmount(), actionSource);
                     if (inserted > 0) {
                         stack.shrink(inserted);
                         if (stack.isEmpty()) {
@@ -693,18 +775,18 @@ public class CraftingIOBufferPartMachine extends MEPartMachine implements ICraft
         @Override
         public List<Object> getContents() {
             return Arrays.stream(internalInventory)
-                    .map(InternalSlot::getItemInputs)
-                    .flatMap(Arrays::stream)
-                    .collect(Collectors.toList());
+                .map(InternalSlot::getItemInputs)
+                .flatMap(Arrays::stream)
+                .collect(Collectors.toList());
         }
 
         @Override
         public double getTotalContentAmount() {
             return Arrays.stream(internalInventory)
-                    .map(InternalSlot::getItemInputs)
-                    .flatMap(Arrays::stream)
-                    .mapToLong(ItemStack::getCount)
-                    .sum();
+                .map(InternalSlot::getItemInputs)
+                .flatMap(Arrays::stream)
+                .mapToLong(ItemStack::getCount)
+                .sum();
         }
 
         @Override
@@ -746,18 +828,18 @@ public class CraftingIOBufferPartMachine extends MEPartMachine implements ICraft
         @Override
         public List<Object> getContents() {
             return Arrays.stream(internalInventory)
-                    .map(InternalSlot::getFluidInputs)
-                    .flatMap(Arrays::stream)
-                    .collect(Collectors.toList());
+                .map(InternalSlot::getFluidInputs)
+                .flatMap(Arrays::stream)
+                .collect(Collectors.toList());
         }
 
         @Override
         public double getTotalContentAmount() {
             return Arrays.stream(internalInventory)
-                    .map(InternalSlot::getFluidInputs)
-                    .flatMap(Arrays::stream)
-                    .mapToLong(FluidStack::getAmount)
-                    .sum();
+                .map(InternalSlot::getFluidInputs)
+                .flatMap(Arrays::stream)
+                .mapToLong(FluidStack::getAmount)
+                .sum();
         }
 
         @Override
