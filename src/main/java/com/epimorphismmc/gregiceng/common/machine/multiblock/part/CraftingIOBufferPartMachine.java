@@ -7,7 +7,11 @@ import appeng.api.inventories.InternalInventory;
 import appeng.api.networking.GridHelper;
 import appeng.api.networking.IGrid;
 import appeng.api.networking.crafting.ICraftingProvider;
-import appeng.api.stacks.*;
+import appeng.api.stacks.AEFluidKey;
+import appeng.api.stacks.AEItemKey;
+import appeng.api.stacks.AEKey;
+import appeng.api.stacks.AEKeyType;
+import appeng.api.stacks.KeyCounter;
 import appeng.api.storage.MEStorage;
 import appeng.api.storage.StorageHelper;
 import appeng.crafting.pattern.EncodedPatternItem;
@@ -15,52 +19,46 @@ import appeng.crafting.pattern.ProcessingPatternItem;
 import appeng.helpers.patternprovider.PatternContainer;
 import com.epimorphismmc.gregiceng.GregicEng;
 import com.epimorphismmc.gregiceng.api.gui.GEGuiTextures;
+import com.epimorphismmc.gregiceng.api.gui.wight.TextInputButtonWidget;
 import com.epimorphismmc.gregiceng.common.data.GEMachines;
 import com.epimorphismmc.monomorphism.ae2.AEUtils;
 import com.epimorphismmc.monomorphism.ae2.MEPartMachine;
 import com.epimorphismmc.monomorphism.machine.fancyconfigurator.ButtonConfigurator;
 import com.epimorphismmc.monomorphism.machine.fancyconfigurator.InventoryFancyConfigurator;
 import com.epimorphismmc.monomorphism.machine.fancyconfigurator.TankFancyConfigurator;
-import com.epimorphismmc.monomorphism.recipe.MORecipeHelper;
 import com.epimorphismmc.monomorphism.utility.MONBTUtils;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.gregtechceu.gtceu.api.GTValues;
-import com.gregtechceu.gtceu.api.capability.recipe.FluidRecipeCapability;
 import com.gregtechceu.gtceu.api.capability.recipe.IO;
-import com.gregtechceu.gtceu.api.capability.recipe.ItemRecipeCapability;
-import com.gregtechceu.gtceu.api.capability.recipe.RecipeCapability;
 import com.gregtechceu.gtceu.api.gui.GuiTextures;
 import com.gregtechceu.gtceu.api.gui.fancy.ConfiguratorPanel;
+import com.gregtechceu.gtceu.api.gui.fancy.IFancyConfiguratorButton;
 import com.gregtechceu.gtceu.api.machine.IMachineBlockEntity;
 import com.gregtechceu.gtceu.api.machine.MultiblockMachineDefinition;
 import com.gregtechceu.gtceu.api.machine.TickableSubscription;
 import com.gregtechceu.gtceu.api.machine.fancyconfigurator.CircuitFancyConfigurator;
 import com.gregtechceu.gtceu.api.machine.feature.multiblock.IMultiController;
-import com.gregtechceu.gtceu.api.machine.feature.multiblock.IWorkableMultiController;
 import com.gregtechceu.gtceu.api.machine.trait.IRecipeHandlerTrait;
 import com.gregtechceu.gtceu.api.machine.trait.NotifiableFluidTank;
 import com.gregtechceu.gtceu.api.machine.trait.NotifiableItemStackHandler;
-import com.gregtechceu.gtceu.api.recipe.GTRecipe;
 import com.gregtechceu.gtceu.api.recipe.ingredient.FluidIngredient;
 import com.gregtechceu.gtceu.common.item.IntCircuitBehaviour;
 import com.lowdragmc.lowdraglib.gui.texture.GuiTextureGroup;
 import com.lowdragmc.lowdraglib.gui.util.ClickData;
 import com.lowdragmc.lowdraglib.gui.widget.LabelWidget;
-import com.lowdragmc.lowdraglib.gui.widget.SlotWidget;
 import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import com.lowdragmc.lowdraglib.misc.ItemStackTransfer;
 import com.lowdragmc.lowdraglib.side.fluid.FluidHelper;
 import com.lowdragmc.lowdraglib.side.fluid.FluidStack;
 import com.lowdragmc.lowdraglib.syncdata.IContentChangeAware;
-import com.lowdragmc.lowdraglib.syncdata.ISubscription;
 import com.lowdragmc.lowdraglib.syncdata.ITagSerializable;
 import com.lowdragmc.lowdraglib.syncdata.annotation.DescSynced;
 import com.lowdragmc.lowdraglib.syncdata.annotation.Persisted;
 import com.lowdragmc.lowdraglib.syncdata.field.ManagedFieldHolder;
+import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.core.Direction;
@@ -68,7 +66,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.TickTask;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
@@ -76,8 +73,13 @@ import net.minecraft.world.item.crafting.Ingredient;
 import org.apache.commons.lang3.ArrayUtils;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 public class CraftingIOBufferPartMachine extends MEPartMachine implements ICraftingProvider, PatternContainer {
     protected static final ManagedFieldHolder MANAGED_FIELD_HOLDER = new ManagedFieldHolder(CraftingIOBufferPartMachine.class, MEPartMachine.MANAGED_FIELD_HOLDER);
@@ -113,22 +115,17 @@ public class CraftingIOBufferPartMachine extends MEPartMachine implements ICraft
     protected final NotifiableFluidTank shareTank;
     @Getter
     @Persisted
-    private final InternalSlot[] internalInventory = new InternalSlot[MAX_PATTERN_COUNT];
+    protected final InternalSlot[] internalInventory = new InternalSlot[MAX_PATTERN_COUNT];
     private final BiMap<IPatternDetails, InternalSlot> patternDetailsPatternSlotMap = HashBiMap.create(MAX_PATTERN_COUNT);
-    @Persisted
-    private ResourceLocation lockedRecipeId;
-    @Persisted
-    private int lockedSlot;
+    @Getter
+    private final List<IRecipeHandlerTrait> handlers;
     @DescSynced
     @Persisted
+    @Setter
     private String customName = "";
-    private boolean isOutputting;
-    private boolean hasCached;
     private boolean needPatternSync = true;
-    protected List<Runnable> listeners = new ArrayList<>();
-    protected Object2LongOpenHashMap<AEFluidKey> returnFluidMap = new Object2LongOpenHashMap<>();
-    protected Object2LongOpenHashMap<AEItemKey> returnItemMap = new Object2LongOpenHashMap<>();
     protected Object2LongOpenHashMap<AEKey> returnBuffer = new Object2LongOpenHashMap<>();
+    protected final BufferRecipeHandler recipeHandler = new BufferRecipeHandler(this);
 
     @Nullable
     protected TickableSubscription updateSubs;
@@ -143,14 +140,8 @@ public class CraftingIOBufferPartMachine extends MEPartMachine implements ICraft
         this.circuitInventory = new NotifiableItemStackHandler(this, 1, IO.IN, IO.NONE).setFilter(IntCircuitBehaviour::isIntegratedCircuit);
         this.shareInventory = new NotifiableItemStackHandler(this, 9, IO.IN, IO.NONE);
         this.shareTank = new NotifiableFluidTank(this, 9, 8 * FluidHelper.getBucket(), IO.IN, IO.NONE);
-    }
-
-    @Override
-    public boolean afterWorking(IWorkableMultiController controller) {
-        this.isOutputting = true;
-        this.lockedRecipeId = null;
-        this.hasCached = false;
-        return super.afterWorking(controller);
+        this.handlers = new ArrayList<>(super.getRecipeHandlers());
+        handlers.addAll(recipeHandler.getRecipeHandlers());
     }
 
     @Override
@@ -167,6 +158,12 @@ public class CraftingIOBufferPartMachine extends MEPartMachine implements ICraft
                 }
             }));
         }
+    }
+
+    @Override
+    public void removedFromController(IMultiController controller) {
+        super.removedFromController(controller);
+        recipeHandler.clearCache();
     }
 
     protected void updateSubscription() {
@@ -205,98 +202,8 @@ public class CraftingIOBufferPartMachine extends MEPartMachine implements ICraft
     }
 
     @Override
-    public void removedFromController(IMultiController controller) {
-        super.removedFromController(controller);
-        returnFluidMap.clear();
-        returnItemMap.clear();
-    }
-
-    public List<Ingredient> handleItemInner(GTRecipe recipe, List<Ingredient> left, boolean simulate) {
-        if (recipe.id.equals(lockedRecipeId) && lockedSlot >= 0) {
-            left = internalInventory[lockedSlot].handleItemInternal(left, simulate);
-            if (!hasCached && left == null && !simulate) {
-                cacheRecipeOutput(recipe);
-                this.hasCached = true;
-            }
-            return left;
-        } else {
-            this.lockedRecipeId = recipe.id;
-            List<Ingredient> contents = copyIngredients(left);
-            for (int i = 0; i < internalInventory.length; i++) {
-                if (internalInventory[i].isItemEmpty()) continue;
-                contents = internalInventory[i].handleItemInternal(contents, simulate);
-                if (contents == null) {
-                    if (!hasCached && !simulate) {
-                        cacheRecipeOutput(recipe);
-                        this.hasCached = true;
-                    }
-                    this.lockedSlot = i;
-                    return contents;
-                }
-                contents = copyIngredients(left);
-            }
-            this.lockedSlot = -1;
-            return left;
-        }
-    }
-
-    private void cacheRecipeOutput(GTRecipe recipe) {
-        this.returnItemMap.clear();
-        for (ItemStack stack : MORecipeHelper.getOutputItem(recipe)) {
-            var key = AEItemKey.of(stack.getItem(), stack.getTag());
-            returnItemMap.mergeLong(key, stack.getCount(), Long::sum);
-        }
-
-        this.returnFluidMap.clear();
-        for (FluidStack stack : MORecipeHelper.getOutputFluid(recipe)) {
-            var key = AEFluidKey.of(stack.getFluid(), stack.getTag());
-            returnFluidMap.mergeLong(key, stack.getAmount(), Long::sum);
-        }
-    }
-
-    public List<FluidIngredient> handleFluidInner(GTRecipe recipe, List<FluidIngredient> left, boolean simulate) {
-        if (recipe.id.equals(lockedRecipeId) && lockedSlot >= 0) {
-            left = internalInventory[lockedSlot].handleFluidInternal(left, simulate);
-            if (!hasCached && left == null && !simulate) {
-                cacheRecipeOutput(recipe);
-                this.hasCached = true;
-            }
-            return left;
-        } else {
-            this.lockedRecipeId = recipe.id;
-            List<FluidIngredient> contents = copyFluidIngredients(left);
-            for (int i = 0; i < internalInventory.length; i++) {
-                if (internalInventory[i].isFluidEmpty()) continue;
-                contents = internalInventory[i].handleFluidInternal(contents, simulate);
-                if (contents == null) {
-                    if (!hasCached && !simulate) {
-                        cacheRecipeOutput(recipe);
-                        this.hasCached = true;
-                    }
-                    this.lockedSlot = i;
-                    return contents;
-                }
-                contents = copyFluidIngredients(left);
-            }
-            this.lockedSlot = -1;
-            return left;
-        }
-    }
-
-    private List<Ingredient> copyIngredients(List<Ingredient> ingredients) {
-        List<Ingredient> result = new ObjectArrayList<>(ingredients.size());
-        for (Ingredient ingredient : ingredients) {
-            result.add(ItemRecipeCapability.CAP.copyInner(ingredient));
-        }
-        return result;
-    }
-
-    private List<FluidIngredient> copyFluidIngredients(List<FluidIngredient> ingredients) {
-        List<FluidIngredient> result = new ObjectArrayList<>(ingredients.size());
-        for (FluidIngredient ingredient : ingredients) {
-            result.add(FluidRecipeCapability.CAP.copyInner(ingredient));
-        }
-        return result;
+    public List<IRecipeHandlerTrait> getRecipeHandlers() {
+        return handlers;
     }
 
     private void refundAll(ClickData clickData) {
@@ -307,9 +214,43 @@ public class CraftingIOBufferPartMachine extends MEPartMachine implements ICraft
         }
     }
 
+    private void onPatternChange(int index) {
+        if (isRemote()) return;
+
+        // remove old if applicable
+        var internalInv = internalInventory[index];
+        var newPattern = patternInventory.getStackInSlot(index);
+        var newPatternDetails = PatternDetailsHelper.decodePattern(newPattern, getLevel());
+        var oldPatternDetails = patternDetailsPatternSlotMap.inverse().get(internalInv);
+        patternDetailsPatternSlotMap.forcePut(newPatternDetails, internalInv);
+        if (oldPatternDetails != null && !oldPatternDetails.equals(newPatternDetails)) {
+            internalInv.refund();
+        }
+
+        needPatternSync = true;
+    }
+
     //////////////////////////////////////
     //**********     GUI     ***********//
     //////////////////////////////////////
+
+    @Override
+    public void attachConfigurators(ConfiguratorPanel configuratorPanel) {
+        configuratorPanel.attachConfigurators(new IFancyConfiguratorButton.Toggle(
+            GuiTextures.BUTTON_POWER.getSubTexture(0, 0, 1, 0.5),
+            GuiTextures.BUTTON_POWER.getSubTexture(0, 0.5, 1, 0.5),
+            this::isWorkingEnabled, (clickData, pressed) -> this.setWorkingEnabled(pressed))
+            .setTooltipsSupplier(pressed -> List.of(
+                Component.translatable(pressed ? "behaviour.soft_hammer.enabled" : "behaviour.soft_hammer.disabled")
+            )));
+        configuratorPanel.attachConfigurators(new ButtonConfigurator(new GuiTextureGroup(GuiTextures.BUTTON, GEGuiTextures.REFUND_OVERLAY), this::refundAll)
+                .setTooltips(List.of(Component.translatable("gui.gregiceng.refund_all.desc"))));
+        configuratorPanel.attachConfigurators(new CircuitFancyConfigurator(circuitInventory.storage));
+        configuratorPanel.attachConfigurators(new InventoryFancyConfigurator(shareInventory.storage, Component.translatable("gui.gregiceng.share_inventory.title"))
+                .setTooltips(List.of(Component.translatable("gui.gregiceng.share_inventory.desc"))));
+        configuratorPanel.attachConfigurators(new TankFancyConfigurator(shareTank.getStorages(), Component.translatable("gui.gregiceng.share_tank.title"))
+                .setTooltips(List.of(Component.translatable("gui.gregiceng.share_tank.desc"))));
+    }
 
     @Override
     public Widget createUIWidget() {
@@ -320,7 +261,8 @@ public class CraftingIOBufferPartMachine extends MEPartMachine implements ICraft
         for (int y = 0; y < colSize; ++y) {
             for (int x = 0; x < rowSize; ++x) {
                 int finalI = index;
-                var slot = new SlotWidget(patternInventory, index++, 8 + x * 18, 14 + y * 18)
+                var slot = new OccupableSlotWidget(patternInventory, index++, 8 + x * 18, 14 + y * 18)
+                    .setOccupiedTexture(GuiTextures.SLOT)
                     .setItemHook(stack -> {
                         if (!stack.isEmpty() && stack.getItem() instanceof EncodedPatternItem iep) {
                             final ItemStack out = iep.getOutput(stack);
@@ -340,42 +282,11 @@ public class CraftingIOBufferPartMachine extends MEPartMachine implements ICraft
             "gtceu.gui.me_network.online" :
             "gtceu.gui.me_network.offline"));
 
+        group.addWidget(new TextInputButtonWidget(18 * rowSize + 8 - 70, 2, 70, 10)
+            .setText(customName)
+            .setOnConfirm(this::setCustomName));
+
         return group;
-    }
-
-    @Override
-    public void attachConfigurators(ConfiguratorPanel configuratorPanel) {
-        super.attachConfigurators(configuratorPanel);
-        configuratorPanel.attachConfigurators(new ButtonConfigurator(new GuiTextureGroup(GuiTextures.BUTTON, GEGuiTextures.REFUND_OVERLAY), this::refundAll)
-            .setTooltips(List.of(Component.translatable("gui.gregiceng.refund_all.desc"))));
-        configuratorPanel.attachConfigurators(new CircuitFancyConfigurator(circuitInventory.storage));
-        configuratorPanel.attachConfigurators(new InventoryFancyConfigurator(shareInventory.storage, Component.translatable("gui.gregiceng.share_inventory.title"))
-            .setTooltips(List.of(Component.translatable("gui.gregiceng.share_inventory.desc"))));
-        configuratorPanel.attachConfigurators(new TankFancyConfigurator(shareTank.getStorages(), Component.translatable("gui.gregiceng.share_tank.title"))
-            .setTooltips(List.of(Component.translatable("gui.gregiceng.share_tank.desc"))));
-    }
-
-    private void onPatternChange(int index) {
-        if (isRemote()) return;
-
-        // remove old if applicable
-        var internalInv = internalInventory[index];
-        var newPattern = patternInventory.getStackInSlot(index);
-        var newPatternDetails = PatternDetailsHelper.decodePattern(newPattern, getLevel());
-        var oldPatternDetails = patternDetailsPatternSlotMap.inverse().get(internalInv);
-        patternDetailsPatternSlotMap.forcePut(newPatternDetails, internalInv);
-        if (oldPatternDetails != null && !oldPatternDetails.equals(newPatternDetails)) {
-            internalInv.refund();
-        }
-
-        needPatternSync = true;
-    }
-
-    @Override
-    public void setFrontFacing(Direction facing) {
-        super.setFrontFacing(facing);
-        if (isRemote()) return;
-        this.getMainNode().setExposedOnSides(EnumSet.of(facing));
     }
 
     @Override
@@ -396,9 +307,14 @@ public class CraftingIOBufferPartMachine extends MEPartMachine implements ICraft
         var slot = patternDetailsPatternSlotMap.get(patternDetails);
         if (slot != null) {
             slot.pushPattern(patternDetails, inputHolder);
-            listeners.forEach(Runnable::run);
+            recipeHandler.onChanged();
             return true;
         }
+        return false;
+    }
+
+    @Override
+    public boolean isBusy() {
         return false;
     }
 
@@ -414,8 +330,10 @@ public class CraftingIOBufferPartMachine extends MEPartMachine implements ICraft
     }
 
     @Override
-    public boolean isBusy() {
-        return false;
+    public void setFrontFacing(Direction facing) {
+        super.setFrontFacing(facing);
+        if (isRemote()) return;
+        this.getMainNode().setExposedOnSides(EnumSet.of(facing));
     }
 
     @Override
@@ -425,37 +343,38 @@ public class CraftingIOBufferPartMachine extends MEPartMachine implements ICraft
     }
 
     @Override
-    public boolean canShared() {
-        return false;
-    }
-
-    @Override
-    public ManagedFieldHolder getFieldHolder() {
-        return MANAGED_FIELD_HOLDER;
-    }
-
-    @Override
-    public List<IRecipeHandlerTrait> getRecipeHandlers() {
-        var handlers = new ArrayList<>(super.getRecipeHandlers());
-        handlers.add(new ItemInputHandler());
-        handlers.add(new FluidInputHandler());
-        handlers.add(new ItemOutputHandler());
-        handlers.add(new FluidOutputHandler());
-        return handlers;
+    public void saveCustomPersistedData(CompoundTag tag, boolean forDrop) {
+        super.saveCustomPersistedData(tag, forDrop);
+        if (!forDrop) {
+            recipeHandler.saveCustomPersistedData(tag);
+            var mapTag = new ListTag();
+            for (Object2LongMap.Entry<AEKey> entry : returnBuffer.object2LongEntrySet()) {
+                var entryTag = new CompoundTag();
+                entryTag.put("key", entry.getKey().toTagGeneric());
+                entryTag.putLong("value", entry.getLongValue());
+                mapTag.add(entryTag);
+            }
+            tag.put("returnBuffer", mapTag);
+        }
     }
 
     @Override
     public void loadCustomPersistedData(CompoundTag tag) {
         super.loadCustomPersistedData(tag);
-
+        recipeHandler.loadCustomPersistedData(tag);
+        var mapTag = tag.getList("returnBuffer", Tag.TAG_COMPOUND);
+        for (int i = 0; i < mapTag.size(); ++i) {
+            var entryTag = mapTag.getCompound(i);
+            var key = AEKey.fromTagGeneric(entryTag.getCompound("key"));
+            if (key != null) {
+                returnBuffer.put(key, entryTag.getLong("value"));
+            }
+        }
     }
 
     @Override
-    public void saveCustomPersistedData(CompoundTag tag, boolean forDrop) {
-        super.saveCustomPersistedData(tag, forDrop);
-        if (!forDrop) {
-
-        }
+    public ManagedFieldHolder getFieldHolder() {
+        return MANAGED_FIELD_HOLDER;
     }
 
     @Override
@@ -744,249 +663,6 @@ public class CraftingIOBufferPartMachine extends MEPartMachine implements ICraft
                     GregicEng.logger().warn("An error occurred while loading contents of ME Crafting Input Bus. This fluid has been voided: " + tagFluidStack);
                 }
             }
-        }
-    }
-
-    //////////////////////////////////////
-    //*******   Recipe Handlers  *******//
-    //////////////////////////////////////
-
-    public class ItemInputHandler implements IRecipeHandlerTrait<Ingredient> {
-        @Override
-        public IO getHandlerIO() {
-            return IO.IN;
-        }
-
-        @Override
-        public ISubscription addChangedListener(Runnable listener) {
-            listeners.add(listener);
-            return () -> listeners.remove(listener);
-        }
-
-        @Override
-        public List<Ingredient> handleRecipeInner(IO io, GTRecipe recipe, List<Ingredient> left, @Nullable String slotName, boolean simulate) {
-            if (io != IO.IN) return left;
-            isOutputting = false;
-            circuitInventory.handleRecipeInner(io, recipe, left, slotName, simulate);
-            left = handleItemInner(recipe, left, simulate);
-            return left != null ? shareInventory.handleRecipeInner(io, recipe, left, slotName, simulate) : null;
-        }
-
-        @Override
-        public List<Object> getContents() {
-            return Arrays.stream(internalInventory)
-                .map(InternalSlot::getItemInputs)
-                .flatMap(Arrays::stream)
-                .collect(Collectors.toList());
-        }
-
-        @Override
-        public double getTotalContentAmount() {
-            return Arrays.stream(internalInventory)
-                .map(InternalSlot::getItemInputs)
-                .flatMap(Arrays::stream)
-                .mapToLong(ItemStack::getCount)
-                .sum();
-        }
-
-        @Override
-        public int getPriority() {
-            return Integer.MAX_VALUE;
-        }
-
-        @Override
-        public boolean isDistinct() {
-            return true;
-        }
-
-        @Override
-        public RecipeCapability<Ingredient> getCapability() {
-            return ItemRecipeCapability.CAP;
-        }
-    }
-
-    public class FluidInputHandler implements IRecipeHandlerTrait<FluidIngredient> {
-        @Override
-        public IO getHandlerIO() {
-            return IO.IN;
-        }
-
-        @Override
-        public ISubscription addChangedListener(Runnable listener) {
-            listeners.add(listener);
-            return () -> listeners.remove(listener);
-        }
-
-        @Override
-        public List<FluidIngredient> handleRecipeInner(IO io, GTRecipe recipe, List<FluidIngredient> left, @Nullable String slotName, boolean simulate) {
-            if (io != IO.IN) return left;
-            isOutputting = false;
-            left = handleFluidInner(recipe, left, simulate);
-            return left != null ? shareTank.handleRecipeInner(io, recipe, left, slotName, simulate) : null;
-        }
-
-        @Override
-        public List<Object> getContents() {
-            return Arrays.stream(internalInventory)
-                .map(InternalSlot::getFluidInputs)
-                .flatMap(Arrays::stream)
-                .collect(Collectors.toList());
-        }
-
-        @Override
-        public double getTotalContentAmount() {
-            return Arrays.stream(internalInventory)
-                .map(InternalSlot::getFluidInputs)
-                .flatMap(Arrays::stream)
-                .mapToLong(FluidStack::getAmount)
-                .sum();
-        }
-
-        @Override
-        public int getPriority() {
-            return Integer.MAX_VALUE;
-        }
-
-        @Override
-        public boolean isDistinct() {
-            return true;
-        }
-
-        @Override
-        public RecipeCapability<FluidIngredient> getCapability() {
-            return FluidRecipeCapability.CAP;
-        }
-    }
-
-    public class ItemOutputHandler implements IRecipeHandlerTrait<Ingredient> {
-        @Override
-        public IO getHandlerIO() {
-            return IO.OUT;
-        }
-
-        @Override
-        public ISubscription addChangedListener(Runnable listener) {
-            listeners.add(listener);
-            return () -> listeners.remove(listener);
-        }
-
-        @Override
-        public List<Ingredient> handleRecipeInner(IO io, GTRecipe recipe, List<Ingredient> left, @Nullable String slotName, boolean simulate) {
-            if (io != IO.OUT) return left;
-            if (!isOutputting) return null;
-            Iterator<Ingredient> iterator = left.iterator();
-            while (iterator.hasNext()) {
-                Ingredient ingredient = iterator.next();
-                ItemStack[] ingredientStacks = ingredient.getItems();
-                SLOT_LOOKUP:
-                for (ItemStack ingredientStack : ingredientStacks) {
-                    for (var entry : returnItemMap.object2LongEntrySet()) {
-                        var key = entry.getKey();
-                        long amount = entry.getLongValue();
-                        int count = ingredientStack.getCount();
-                        if (key.matches(ingredientStack) && count == amount) {
-                            if (!simulate) {
-                                returnBuffer.mergeLong(key, amount, Long::sum);
-                                returnItemMap.removeLong(key);
-                            }
-                            iterator.remove();
-                            break SLOT_LOOKUP;
-                        }
-                    }
-                }
-            }
-            return left.isEmpty() ? null : left;
-        }
-
-        @Override
-        public List<Object> getContents() {
-            return Collections.emptyList();
-        }
-
-        @Override
-        public double getTotalContentAmount() {
-            return 0D;
-        }
-
-        @Override
-        public int getPriority() {
-            return Integer.MAX_VALUE;
-        }
-
-        @Override
-        public boolean isDistinct() {
-            return true;
-        }
-
-        @Override
-        public RecipeCapability<Ingredient> getCapability() {
-            return ItemRecipeCapability.CAP;
-        }
-    }
-
-    public class FluidOutputHandler implements IRecipeHandlerTrait<FluidIngredient> {
-        @Override
-        public IO getHandlerIO() {
-            return IO.OUT;
-        }
-
-        @Override
-        public ISubscription addChangedListener(Runnable listener) {
-            listeners.add(listener);
-            return () -> listeners.remove(listener);
-        }
-
-        @Override
-        public List<FluidIngredient> handleRecipeInner(IO io, GTRecipe recipe, List<FluidIngredient> left, @Nullable String slotName, boolean simulate) {
-            if (io != IO.OUT) return left;
-            if (!isOutputting) return null;
-            Iterator<FluidIngredient> iterator = left.iterator();
-            while (iterator.hasNext()) {
-                FluidIngredient ingredient = iterator.next();
-                FluidStack[] ingredientStacks = ingredient.getStacks();
-                SLOT_LOOKUP:
-                for (FluidStack ingredientStack : ingredientStacks) {
-                    for (var entry : returnFluidMap.object2LongEntrySet()) {
-                        var key = entry.getKey();
-                        long amount = entry.getLongValue();
-                        long count = ingredientStack.getAmount();
-                        if (AEUtils.matches(key, ingredientStack) && count == amount) {
-                            if (!simulate) {
-                                returnBuffer.mergeLong(key, amount, Long::sum);
-                                returnFluidMap.removeLong(key);
-                            }
-                            iterator.remove();
-                            break SLOT_LOOKUP;
-                        }
-                    }
-                }
-            }
-            return left.isEmpty() ? null : left;
-        }
-
-        @Override
-        public List<Object> getContents() {
-            return Collections.emptyList();
-        }
-
-        @Override
-        public double getTotalContentAmount() {
-            return 0D;
-        }
-
-        @Override
-        public int getPriority() {
-            return Integer.MAX_VALUE;
-        }
-
-        @Override
-        public boolean isDistinct() {
-            return true;
-        }
-
-        @Override
-        public RecipeCapability<FluidIngredient> getCapability() {
-            return FluidRecipeCapability.CAP;
         }
     }
 }

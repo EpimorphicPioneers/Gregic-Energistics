@@ -2,6 +2,7 @@ package com.epimorphismmc.gregiceng.common.data;
 
 import com.epimorphismmc.gregiceng.common.machine.multiblock.part.BufferPartMachine;
 import com.epimorphismmc.gregiceng.common.machine.multiblock.part.CraftingIOBufferPartMachine;
+import com.epimorphismmc.gregiceng.common.machine.multiblock.part.CraftingIOSlavePartMachine;
 import com.gregtechceu.gtceu.api.capability.recipe.IO;
 import com.gregtechceu.gtceu.api.data.RotationState;
 import com.gregtechceu.gtceu.api.machine.IMachineBlockEntity;
@@ -32,6 +33,14 @@ public class GEMachines {
             .overlayTieredHullRenderer("crafting_io_buffer")
             .tooltips(Component.translatable("block.gregiceng.crafting_io_buffer.desc.0"))
             .register();
+
+    public final static MachineDefinition CRAFTING_IO_SLAVE = registrate().machine("crafting_io_slave", CraftingIOSlavePartMachine::new)
+        .tier(LuV)
+        .rotationState(RotationState.ALL)
+        .abilities(PartAbility.IMPORT_ITEMS, PartAbility.IMPORT_FLUIDS, PartAbility.EXPORT_ITEMS, PartAbility.EXPORT_FLUIDS)
+        .overlayTieredHullRenderer("crafting_io_slave")
+        .tooltips(Component.translatable("block.gregiceng.crafting_io_slave.desc.0"))
+        .register();
 
     public static final MachineDefinition[] INPUT_BUFFER = registerTieredGEMachines("input_buffer",
             (holder, tier) -> new BufferPartMachine(holder, tier, IO.IN),
