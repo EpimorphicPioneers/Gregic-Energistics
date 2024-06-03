@@ -16,10 +16,24 @@ public class GELangHandler {
                 "ME Crafting IO Buffer",
                 "ME样板IO总成",
                 List.of(
-
+""
                 ),
                 List.of(
+                        "需与ME网络连接，可容纳54个样板，支持流体与物品的处理样板",
+                        "分别拥有9个物品和流体的不消耗品槽",
+                        "允许产物直接回流至网络"
+                ));
 
+        provider.addBlockWithTooltip(CRAFTING_IO_SLAVE::getBlock,
+                "ME Crafting IO Slave",
+                "ME样板IO镜像",
+                List.of(
+""
+                ),
+                List.of(
+                        "ME样板IO总成的镜像端，无需与ME网络连接",
+                        "使用闪存左键复制ME样板IO总成信息",
+                        "再使用闪存右键粘贴至ME样板IO镜像"
                 ));
 
         provider.addTieredMachineName("input_buffer", "输入总成", MULTI_HATCH_TIERS);

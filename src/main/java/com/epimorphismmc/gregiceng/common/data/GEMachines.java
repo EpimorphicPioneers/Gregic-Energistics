@@ -31,7 +31,11 @@ public class GEMachines {
             .rotationState(RotationState.ALL)
             .abilities(PartAbility.IMPORT_ITEMS, PartAbility.IMPORT_FLUIDS, PartAbility.EXPORT_ITEMS, PartAbility.EXPORT_FLUIDS)
             .overlayTieredHullRenderer("crafting_io_buffer")
-            .tooltips(Component.translatable("block.gregiceng.crafting_io_buffer.desc.0"))
+            .tooltips(
+                    Component.translatable("block.gregiceng.crafting_io_buffer.desc.0"),
+                    Component.translatable("block.gregiceng.crafting_io_buffer.desc.1"),
+                    Component.translatable("block.gregiceng.crafting_io_buffer.desc.2")
+            )
             .register();
 
     public final static MachineDefinition CRAFTING_IO_SLAVE = registrate().machine("crafting_io_slave", CraftingIOSlavePartMachine::new)
@@ -39,7 +43,11 @@ public class GEMachines {
         .rotationState(RotationState.ALL)
         .abilities(PartAbility.IMPORT_ITEMS, PartAbility.IMPORT_FLUIDS, PartAbility.EXPORT_ITEMS, PartAbility.EXPORT_FLUIDS)
         .overlayTieredHullRenderer("crafting_io_slave")
-        .tooltips(Component.translatable("block.gregiceng.crafting_io_slave.desc.0"))
+        .tooltips(
+                Component.translatable("block.gregiceng.crafting_io_slave.desc.0"),
+                Component.translatable("block.gregiceng.crafting_io_slave.desc.1"),
+                Component.translatable("block.gregiceng.crafting_io_slave.desc.2")
+        )
         .register();
 
     public static final MachineDefinition[] INPUT_BUFFER = registerTieredGEMachines("input_buffer",
