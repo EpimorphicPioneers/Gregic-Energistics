@@ -32,6 +32,7 @@
   "block.gregiceng.uxv_output_buffer": "§eUXV§r输出总成",
   "block.gregiceng.zpm_input_buffer": "§cZPM§r输入总成",
   "block.gregiceng.zpm_output_buffer": "§cZPM§r输出总成",
+  "config.gregiceng.option.enableMoreAbility": "为样板IO总成/镜像启用更多能力",
   "config.jade.plugin_gregiceng.crafting_io_buffer": "样板IO总成",
   "gui.gregiceng.refund_all.desc": "退回所有材料",
   "gui.gregiceng.share_inventory.desc": "打开共享库存",

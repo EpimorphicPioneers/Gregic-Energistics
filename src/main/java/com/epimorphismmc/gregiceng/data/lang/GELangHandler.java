@@ -70,5 +70,10 @@ public class GELangHandler {
                 "Crafting IO Buffer",
                 "样板IO总成"
         );
+
+        provider.add("config.gregiceng.option.enableMoreAbility",
+            "Enable More Ability for Crafting IO Buffer/Slave",
+            "为样板IO总成/镜像启用更多能力")
+        ;
     }
 }

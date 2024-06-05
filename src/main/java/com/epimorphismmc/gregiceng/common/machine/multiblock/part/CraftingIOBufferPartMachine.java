@@ -89,7 +89,13 @@ public class CraftingIOBufferPartMachine extends MEPartMachine implements ICraft
     protected final BufferRecipeHandler recipeHandler = new BufferRecipeHandler(this);
     @Getter
     @Persisted
-    private final ItemStackTransfer patternInventory = new ItemStackTransfer(MAX_PATTERN_COUNT);
+    private final ItemStackTransfer patternInventory = new ItemStackTransfer(MAX_PATTERN_COUNT) {
+        @Override
+        public void onContentsChanged(int slot) {
+            super.onContentsChanged(slot);
+            onPatternChange(slot);
+        }
+    };
     private final InternalInventory internalPatternInventory = new InternalInventory() {
         @Override
         public int size() {
@@ -104,6 +110,7 @@ public class CraftingIOBufferPartMachine extends MEPartMachine implements ICraft
         @Override
         public void setItemDirect(int slotIndex, ItemStack stack) {
             patternInventory.setStackInSlot(slotIndex, stack);
+            patternInventory.onContentsChanged(slotIndex);
         }
     };
     private final BiMap<IPatternDetails, InternalSlot> patternDetailsPatternSlotMap = HashBiMap.create(MAX_PATTERN_COUNT);
@@ -232,12 +239,12 @@ public class CraftingIOBufferPartMachine extends MEPartMachine implements ICraft
                         Component.translatable(pressed ? "behaviour.soft_hammer.enabled" : "behaviour.soft_hammer.disabled")
                 )));
         configuratorPanel.attachConfigurators(new ButtonConfigurator(new GuiTextureGroup(GuiTextures.BUTTON, GEGuiTextures.REFUND_OVERLAY), this::refundAll)
-                .setTooltips(List.of(Component.translatable("gui.gregiceng.refund_all.desc"))));
+            .setTooltips(List.of(Component.translatable("gui.gregiceng.refund_all.desc"))));
         configuratorPanel.attachConfigurators(new CircuitFancyConfigurator(circuitInventory.storage));
         configuratorPanel.attachConfigurators(new InventoryFancyConfigurator(shareInventory.storage, Component.translatable("gui.gregiceng.share_inventory.title"))
-                .setTooltips(List.of(Component.translatable("gui.gregiceng.share_inventory.desc"))));
+            .setTooltips(List.of(Component.translatable("gui.gregiceng.share_inventory.desc"))));
         configuratorPanel.attachConfigurators(new TankFancyConfigurator(shareTank.getStorages(), Component.translatable("gui.gregiceng.share_tank.title"))
-                .setTooltips(List.of(Component.translatable("gui.gregiceng.share_tank.desc"))));
+            .setTooltips(List.of(Component.translatable("gui.gregiceng.share_tank.desc"))));
     }
 
     @Override

@@ -27,6 +27,7 @@
   "block.gregiceng.uxv_output_buffer": "§eUXV Output Buffer",
   "block.gregiceng.zpm_input_buffer": "§cZPM Input Buffer",
   "block.gregiceng.zpm_output_buffer": "§cZPM Output Buffer",
+  "config.gregiceng.option.enableMoreAbility": "Enable More Ability for Crafting IO Buffer/Slave",
   "config.jade.plugin_gregiceng.crafting_io_buffer": "Crafting IO Buffer",
   "gui.gregiceng.refund_all.desc": "Refund raw materials in full",
   "gui.gregiceng.share_inventory.desc": "Open share inventory",
