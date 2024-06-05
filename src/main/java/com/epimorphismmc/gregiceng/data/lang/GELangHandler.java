@@ -4,7 +4,8 @@ import com.epimorphismmc.monomorphism.datagen.lang.MOLangProvider;
 
 import java.util.List;
 
-import static com.epimorphismmc.gregiceng.common.data.GEMachines.*;
+import static com.epimorphismmc.gregiceng.common.data.GEMachines.CRAFTING_IO_BUFFER;
+import static com.epimorphismmc.gregiceng.common.data.GEMachines.CRAFTING_IO_SLAVE;
 import static com.gregtechceu.gtceu.common.data.GTMachines.MULTI_HATCH_TIERS;
 
 public class GELangHandler {
@@ -16,7 +17,7 @@ public class GELangHandler {
                 "ME Crafting IO Buffer",
                 "ME样板IO总成",
                 List.of(
-""
+                        ""
                 ),
                 List.of(
                         "需与ME网络连接，可容纳54个样板，支持流体与物品的处理样板",
@@ -28,10 +29,11 @@ public class GELangHandler {
                 "ME Crafting IO Slave",
                 "ME样板IO镜像",
                 List.of(
-""
+                        ""
                 ),
                 List.of(
-                        "ME样板IO总成的镜像端，无需与ME网络连接",
+                        "无需与ME网络连接，ME样板IO总成的镜像端",
+                        "拥有被复制ME样板IO总成的所有配置，包括不消耗品和处理样板",
                         "使用闪存左键复制ME样板IO总成信息",
                         "再使用闪存右键粘贴至ME样板IO镜像"
                 ));
@@ -65,8 +67,8 @@ public class GELangHandler {
                 "退回所有材料");
 
         provider.add("config.jade.plugin_gregiceng.crafting_io_buffer",
-            "Crafting IO Buffer",
-            "样板IO总成"
+                "Crafting IO Buffer",
+                "样板IO总成"
         );
     }
 }

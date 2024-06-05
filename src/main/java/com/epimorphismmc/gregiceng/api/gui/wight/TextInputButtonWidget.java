@@ -46,8 +46,8 @@ public class TextInputButtonWidget extends WidgetGroup {
     public void initWidget() {
         super.initWidget();
         this.addWidget(new ToggleButtonWidget(getSizeWidth() - getSizeHeight(), 0,
-            getSizeHeight(), getSizeHeight(),
-            this::isInputting, pressed -> {
+                getSizeHeight(), getSizeHeight(),
+                this::isInputting, pressed -> {
             isInputting = pressed;
             if (pressed) {
                 this.textField = new TextFieldWidget(0, 0, getSizeWidth() - getSizeHeight() - 2, getSizeHeight(), this::getText, this::setText);
@@ -57,8 +57,8 @@ public class TextInputButtonWidget extends WidgetGroup {
                 this.removeWidget(textField);
             }
         }).setTexture(
-            new GuiTextureGroup(GuiTextures.VANILLA_BUTTON, new TextTexture("✎")),
-            new GuiTextureGroup(GuiTextures.VANILLA_BUTTON, new TextTexture("✎"))
+                new GuiTextureGroup(GuiTextures.VANILLA_BUTTON, new TextTexture("✎")),
+                new GuiTextureGroup(GuiTextures.VANILLA_BUTTON, new TextTexture("✎"))
         ));
     }
 }

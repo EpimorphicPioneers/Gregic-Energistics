@@ -11,22 +11,22 @@ public record GTRecipeKey(ResourceLocation id, int duration, long eut) {
         this(recipe.id, recipe.duration, RecipeHelper.getInputEUt(recipe) + RecipeHelper.getOutputEUt(recipe));
     }
 
-    public boolean matches(GTRecipe recipe) {
-        return duration == recipe.duration
-            && id.equals(recipe.id)
-            && eut == RecipeHelper.getInputEUt(recipe) + RecipeHelper.getOutputEUt(recipe);
-    }
-
     public static GTRecipeKey create(GTRecipe recipe) {
         return new GTRecipeKey(recipe);
     }
 
     public static GTRecipeKey fromTag(CompoundTag tag) {
         return new GTRecipeKey(
-            ResourceLocation.tryParse(tag.getString("id")),
-            tag.getInt("dur"),
-            tag.getLong("eut")
+                ResourceLocation.tryParse(tag.getString("id")),
+                tag.getInt("dur"),
+                tag.getLong("eut")
         );
+    }
+
+    public boolean matches(GTRecipe recipe) {
+        return duration == recipe.duration
+                && id.equals(recipe.id)
+                && eut == RecipeHelper.getInputEUt(recipe) + RecipeHelper.getOutputEUt(recipe);
     }
 
     public CompoundTag toTag() {

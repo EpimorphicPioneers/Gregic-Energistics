@@ -24,9 +24,6 @@ import java.util.List;
 
 public class CraftingIOSlavePartMachine extends TieredIOPartMachine {
     protected static final ManagedFieldHolder MANAGED_FIELD_HOLDER = new ManagedFieldHolder(CraftingIOSlavePartMachine.class, TieredIOPartMachine.MANAGED_FIELD_HOLDER);
-
-    @Persisted
-    private BlockPos pos;
     private final WrappedRecipeHandlerTrait<Ingredient> itemInputHandler;
     private final WrappedRecipeHandlerTrait<Ingredient> itemOutputHandler;
     private final WrappedRecipeHandlerTrait<FluidIngredient> fluidInputHandler;
@@ -34,6 +31,8 @@ public class CraftingIOSlavePartMachine extends TieredIOPartMachine {
     private final WrappedRecipeHandlerTrait<Ingredient> shareItemHandler;
     private final WrappedRecipeHandlerTrait<FluidIngredient> shareFluidHandler;
     private final WrappedRecipeHandlerTrait<Ingredient> circuitHandler;
+    @Persisted
+    private BlockPos pos;
 
     public CraftingIOSlavePartMachine(IMachineBlockEntity holder) {
         super(holder, GTValues.LuV, IO.BOTH);

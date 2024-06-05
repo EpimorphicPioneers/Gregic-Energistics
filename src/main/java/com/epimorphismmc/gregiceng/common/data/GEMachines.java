@@ -22,10 +22,6 @@ import static com.gregtechceu.gtceu.common.data.GTMachines.MULTI_HATCH_TIERS;
 
 public class GEMachines {
 
-    static {
-        registrate().creativeModeTab(() -> GECreativeModeTabs.MAIN);
-    }
-
     public final static MachineDefinition CRAFTING_IO_BUFFER = registrate().machine("crafting_io_buffer", CraftingIOBufferPartMachine::new)
             .tier(LuV)
             .rotationState(RotationState.ALL)
@@ -37,19 +33,18 @@ public class GEMachines {
                     Component.translatable("block.gregiceng.crafting_io_buffer.desc.2")
             )
             .register();
-
     public final static MachineDefinition CRAFTING_IO_SLAVE = registrate().machine("crafting_io_slave", CraftingIOSlavePartMachine::new)
-        .tier(LuV)
-        .rotationState(RotationState.ALL)
-        .abilities(PartAbility.IMPORT_ITEMS, PartAbility.IMPORT_FLUIDS, PartAbility.EXPORT_ITEMS, PartAbility.EXPORT_FLUIDS)
-        .overlayTieredHullRenderer("crafting_io_slave")
-        .tooltips(
-                Component.translatable("block.gregiceng.crafting_io_slave.desc.0"),
-                Component.translatable("block.gregiceng.crafting_io_slave.desc.1"),
-                Component.translatable("block.gregiceng.crafting_io_slave.desc.2")
-        )
-        .register();
-
+            .tier(LuV)
+            .rotationState(RotationState.ALL)
+            .abilities(PartAbility.IMPORT_ITEMS, PartAbility.IMPORT_FLUIDS, PartAbility.EXPORT_ITEMS, PartAbility.EXPORT_FLUIDS)
+            .overlayTieredHullRenderer("crafting_io_slave")
+            .tooltips(
+                    Component.translatable("block.gregiceng.crafting_io_slave.desc.0"),
+                    Component.translatable("block.gregiceng.crafting_io_slave.desc.1"),
+                    Component.translatable("block.gregiceng.crafting_io_slave.desc.2"),
+                    Component.translatable("block.gregiceng.crafting_io_slave.desc.3")
+            )
+            .register();
     public static final MachineDefinition[] INPUT_BUFFER = registerTieredGEMachines("input_buffer",
             (holder, tier) -> new BufferPartMachine(holder, tier, IO.IN),
             (tier, builder) -> builder
@@ -58,11 +53,10 @@ public class GEMachines {
                     .abilities(PartAbility.IMPORT_ITEMS, PartAbility.IMPORT_FLUIDS)
                     .overlayTieredHullRenderer("buffer.import")
                     .tooltips(Component.translatable("block.gregiceng.input_buffer.desc"),
-                            Component.translatable("gtceu.universal.tooltip.item_storage_capacity", (1 + Math.min(9, tier))*(1 + Math.min(9, tier))),
+                            Component.translatable("gtceu.universal.tooltip.item_storage_capacity", (1 + Math.min(9, tier)) * (1 + Math.min(9, tier))),
                             Component.translatable("gtceu.universal.tooltip.fluid_storage_capacity_mult", 1 + Math.min(9, tier), FluidHatchPartMachine.getTankCapacity(BufferPartMachine.INITIAL_TANK_CAPACITY, tier)))
                     .register(),
             MULTI_HATCH_TIERS);
-
     public static final MachineDefinition[] OUTPUT_BUFFER = registerTieredGEMachines("output_buffer",
             (holder, tier) -> new BufferPartMachine(holder, tier, IO.OUT),
             (tier, builder) -> builder
@@ -71,10 +65,14 @@ public class GEMachines {
                     .abilities(PartAbility.EXPORT_ITEMS, PartAbility.EXPORT_FLUIDS)
                     .overlayTieredHullRenderer("buffer.export")
                     .tooltips(Component.translatable("block.gregiceng.output_buffer.desc"),
-                            Component.translatable("gtceu.universal.tooltip.item_storage_capacity", (1 + Math.min(9, tier))*(1 + Math.min(9, tier))),
+                            Component.translatable("gtceu.universal.tooltip.item_storage_capacity", (1 + Math.min(9, tier)) * (1 + Math.min(9, tier))),
                             Component.translatable("gtceu.universal.tooltip.fluid_storage_capacity_mult", 1 + Math.min(9, tier), FluidHatchPartMachine.getTankCapacity(BufferPartMachine.INITIAL_TANK_CAPACITY, tier)))
                     .register(),
             MULTI_HATCH_TIERS);
+
+    static {
+        registrate().creativeModeTab(() -> GECreativeModeTabs.MAIN);
+    }
 
     public static void init() {
 

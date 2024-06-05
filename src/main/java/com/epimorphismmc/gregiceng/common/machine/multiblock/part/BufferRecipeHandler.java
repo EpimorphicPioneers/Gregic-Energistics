@@ -6,11 +6,7 @@ import com.epimorphismmc.monomorphism.ae2.AEUtils;
 import com.epimorphismmc.monomorphism.recipe.MORecipeHelper;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
-import com.gregtechceu.gtceu.api.capability.recipe.FluidRecipeCapability;
-import com.gregtechceu.gtceu.api.capability.recipe.IO;
-import com.gregtechceu.gtceu.api.capability.recipe.IRecipeCapabilityHolder;
-import com.gregtechceu.gtceu.api.capability.recipe.ItemRecipeCapability;
-import com.gregtechceu.gtceu.api.capability.recipe.RecipeCapability;
+import com.gregtechceu.gtceu.api.capability.recipe.*;
 import com.gregtechceu.gtceu.api.machine.trait.IRecipeHandlerTrait;
 import com.gregtechceu.gtceu.api.machine.trait.MachineTrait;
 import com.gregtechceu.gtceu.api.recipe.GTRecipe;
@@ -27,12 +23,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.epimorphismmc.gregiceng.util.CraftingIOBufferUtil.copyFluidIngredients;
@@ -40,13 +31,6 @@ import static com.epimorphismmc.gregiceng.util.CraftingIOBufferUtil.copyIngredie
 
 public class BufferRecipeHandler extends MachineTrait {
     protected static final ManagedFieldHolder MANAGED_FIELD_HOLDER = new ManagedFieldHolder(BufferRecipeHandler.class);
-    private ResourceLocation lockedRecipeId;
-    private int lockedSlot;
-    private boolean hasCached;
-    private boolean isOutputting;
-    protected List<Runnable> listeners = new ArrayList<>();
-    protected Table<GTRecipeKey, AEFluidKey, Long> returnFluidTable = HashBasedTable.create();
-    protected Table<GTRecipeKey, AEItemKey, Long> returnItemTable = HashBasedTable.create();
     @Getter
     protected final IRecipeHandlerTrait<Ingredient> itemInputHandler;
     @Getter
@@ -55,6 +39,13 @@ public class BufferRecipeHandler extends MachineTrait {
     protected final IRecipeHandlerTrait<Ingredient> itemOutputHandler;
     @Getter
     protected final IRecipeHandlerTrait<FluidIngredient> fluidOutputHandler;
+    protected List<Runnable> listeners = new ArrayList<>();
+    protected Table<GTRecipeKey, AEFluidKey, Long> returnFluidTable = HashBasedTable.create();
+    protected Table<GTRecipeKey, AEItemKey, Long> returnItemTable = HashBasedTable.create();
+    private ResourceLocation lockedRecipeId;
+    private int lockedSlot;
+    private boolean hasCached;
+    private boolean isOutputting;
 
     public BufferRecipeHandler(CraftingIOBufferPartMachine ioBuffer) {
         super(ioBuffer);
@@ -173,12 +164,12 @@ public class BufferRecipeHandler extends MachineTrait {
         saveItemTable(tag);
         saveFluidTable(tag);
     }
-    
+
     public void loadCustomPersistedData(CompoundTag tag) {
         loadItemTable(tag);
         loadFluidTable(tag);
     }
-    
+
     private void saveItemTable(CompoundTag tag) {
         var tableTag = new ListTag();
         for (Map.Entry<AEItemKey, Map<GTRecipeKey, Long>> entry : returnItemTable.columnMap().entrySet()) {
@@ -240,7 +231,7 @@ public class BufferRecipeHandler extends MachineTrait {
             }
         }
     }
-    
+
     @Override
     public ManagedFieldHolder getFieldHolder() {
         return MANAGED_FIELD_HOLDER;
@@ -270,18 +261,18 @@ public class BufferRecipeHandler extends MachineTrait {
         @Override
         public List<Object> getContents() {
             return Arrays.stream(getMachine().internalInventory)
-                .map(CraftingIOBufferPartMachine.InternalSlot::getItemInputs)
-                .flatMap(Arrays::stream)
-                .collect(Collectors.toList());
+                    .map(CraftingIOBufferPartMachine.InternalSlot::getItemInputs)
+                    .flatMap(Arrays::stream)
+                    .collect(Collectors.toList());
         }
 
         @Override
         public double getTotalContentAmount() {
             return Arrays.stream(getMachine().internalInventory)
-                .map(CraftingIOBufferPartMachine.InternalSlot::getItemInputs)
-                .flatMap(Arrays::stream)
-                .mapToLong(ItemStack::getCount)
-                .sum();
+                    .map(CraftingIOBufferPartMachine.InternalSlot::getItemInputs)
+                    .flatMap(Arrays::stream)
+                    .mapToLong(ItemStack::getCount)
+                    .sum();
         }
 
         @Override
@@ -330,18 +321,18 @@ public class BufferRecipeHandler extends MachineTrait {
         @Override
         public List<Object> getContents() {
             return Arrays.stream(getMachine().internalInventory)
-                .map(CraftingIOBufferPartMachine.InternalSlot::getFluidInputs)
-                .flatMap(Arrays::stream)
-                .collect(Collectors.toList());
+                    .map(CraftingIOBufferPartMachine.InternalSlot::getFluidInputs)
+                    .flatMap(Arrays::stream)
+                    .collect(Collectors.toList());
         }
 
         @Override
         public double getTotalContentAmount() {
             return Arrays.stream(getMachine().internalInventory)
-                .map(CraftingIOBufferPartMachine.InternalSlot::getFluidInputs)
-                .flatMap(Arrays::stream)
-                .mapToLong(FluidStack::getAmount)
-                .sum();
+                    .map(CraftingIOBufferPartMachine.InternalSlot::getFluidInputs)
+                    .flatMap(Arrays::stream)
+                    .mapToLong(FluidStack::getAmount)
+                    .sum();
         }
 
         @Override

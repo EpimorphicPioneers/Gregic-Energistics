@@ -35,11 +35,11 @@ public enum CraftingIOBufferProvider implements IBlockComponentProvider, IServer
             CompoundTag itemTag = itemTags.getCompound(i);
             Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemTag.getString("item")));
             long count = itemTag.getLong("count");
-            if (item != null){
+            if (item != null) {
                 iTooltip.add(
-                    item.getDescription().copy().withStyle(ChatFormatting.GOLD)
-                        .append(Component.literal(" * ").withStyle(ChatFormatting.WHITE))
-                        .append(Component.literal("" + count).withStyle(ChatFormatting.LIGHT_PURPLE))
+                        item.getDescription().copy().withStyle(ChatFormatting.GOLD)
+                                .append(Component.literal(" * ").withStyle(ChatFormatting.WHITE))
+                                .append(Component.literal("" + count).withStyle(ChatFormatting.LIGHT_PURPLE))
                 );
             }
         }
@@ -47,11 +47,11 @@ public enum CraftingIOBufferProvider implements IBlockComponentProvider, IServer
             CompoundTag fluidTag = fluidTags.getCompound(i);
             @Nullable FluidType fluid = ForgeRegistries.FLUID_TYPES.get().getValue(new ResourceLocation(fluidTag.getString("fluid")));
             long count = fluidTag.getLong("count");
-            if (fluid != null){
+            if (fluid != null) {
                 iTooltip.add(
-                    fluid.getDescription().copy().withStyle(ChatFormatting.AQUA)
-                        .append(Component.literal(" * ").withStyle(ChatFormatting.WHITE))
-                        .append(Component.literal("" + count).withStyle(ChatFormatting.LIGHT_PURPLE))
+                        fluid.getDescription().copy().withStyle(ChatFormatting.AQUA)
+                                .append(Component.literal(" * ").withStyle(ChatFormatting.WHITE))
+                                .append(Component.literal("" + count).withStyle(ChatFormatting.LIGHT_PURPLE))
                 );
             }
         }
