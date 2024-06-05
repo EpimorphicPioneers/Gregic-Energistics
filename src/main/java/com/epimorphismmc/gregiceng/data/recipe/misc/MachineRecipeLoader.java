@@ -15,7 +15,7 @@ import java.util.function.Consumer;
 import static com.epimorphismmc.gregiceng.common.data.GEMachines.INPUT_BUFFER;
 import static com.epimorphismmc.gregiceng.common.data.GEMachines.OUTPUT_BUFFER;
 import static com.gregtechceu.gtceu.api.GTValues.*;
-import static com.gregtechceu.gtceu.common.data.GTMachines.*;
+import static com.gregtechceu.gtceu.common.data.GTMachines.MULTI_HATCH_TIERS;
 import static com.gregtechceu.gtceu.common.data.GTRecipeTypes.ASSEMBLER_RECIPES;
 import static com.gregtechceu.gtceu.data.recipe.CraftingComponent.GLASS;
 import static com.gregtechceu.gtceu.data.recipe.CraftingComponent.HULL;

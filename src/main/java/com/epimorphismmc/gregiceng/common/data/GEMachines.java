@@ -57,18 +57,31 @@ public class GEMachines {
             .register(),
         MULTI_HATCH_TIERS);
 
+    static {
+        registrate().creativeModeTab(() -> GECreativeModeTabs.MAIN);
+    }
+
     public static void init() {
         MachineBuilder<MachineDefinition> bufferBuilder = registrate().machine("crafting_io_buffer", CraftingIOBufferPartMachine::new)
             .tier(LuV)
             .rotationState(RotationState.ALL)
             .overlayTieredHullRenderer("crafting_io_buffer")
-            .tooltips(Component.translatable("block.gregiceng.crafting_io_buffer.desc.0"));
+            .tooltips(
+                    Component.translatable("block.gregiceng.crafting_io_buffer.desc.0"),
+                    Component.translatable("block.gregiceng.crafting_io_buffer.desc.1"),
+                    Component.translatable("block.gregiceng.crafting_io_buffer.desc.2")
+            );
 
         MachineBuilder<MachineDefinition> slaveBuilder = registrate().machine("crafting_io_slave", CraftingIOSlavePartMachine::new)
             .tier(LuV)
             .rotationState(RotationState.ALL)
             .overlayTieredHullRenderer("crafting_io_slave")
-            .tooltips(Component.translatable("block.gregiceng.crafting_io_slave.desc.0"));
+            .tooltips(
+                    Component.translatable("block.gregiceng.crafting_io_slave.desc.0"),
+                    Component.translatable("block.gregiceng.crafting_io_slave.desc.1"),
+                    Component.translatable("block.gregiceng.crafting_io_slave.desc.2"),
+                    Component.translatable("block.gregiceng.crafting_io_slave.desc.3")
+            );
 
         if (GEConfigHolder.INSTANCE.enableMoreAbility) {
             CRAFTING_IO_BUFFER = bufferBuilder

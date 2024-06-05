@@ -12,18 +12,18 @@ def mod_url = getConfig("mod_url")
 processResources {
     // set up properties for filling into metadata
     var properties = [
-            "version": version,
-            "mod_id": mod_id,
-            "forge_version": forge.versions.forgeShortVersion.get().split("\\.")[0], // only specify major version of forge
-            "forge_version_range": forge_version_range,
-            "loader_version_range": loader_version_range,
+            "version"                : version,
+            "mod_id"                 : mod_id,
+            "forge_version"          : forge.versions.forgeShortVersion.get().split("\\.")[0], // only specify major version of forge
+            "forge_version_range"    : forge_version_range,
+            "loader_version_range"   : loader_version_range,
             "minecraft_version_range": minecraft_version_range,
-            "minecraft_version": libs.versions.minecraft.get(),
-            "mod_license": mod_license,
-            "mod_name": mod_name,
-            "mod_authors": mod_authors,
-            "mod_description": mod_description,
-            "mod_url": mod_url
+            "minecraft_version"      : libs.versions.minecraft.get(),
+            "mod_license"            : mod_license,
+            "mod_name"               : mod_name,
+            "mod_authors"            : mod_authors,
+            "mod_description"        : mod_description,
+            "mod_url"                : mod_url
     ]
     inputs.properties(properties)
 

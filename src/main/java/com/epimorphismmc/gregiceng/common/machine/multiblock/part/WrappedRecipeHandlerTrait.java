@@ -18,10 +18,10 @@ import java.util.function.Supplier;
 public class WrappedRecipeHandlerTrait<K> implements IRecipeHandlerTrait<K> {
     private final IO handlerIO;
     private final RecipeCapability<K> capability;
-    @Setter
-    private Supplier<IRecipeHandlerTrait<K>> handlerSupplier;
     @Getter
     protected List<Runnable> listeners = new ArrayList<>();
+    @Setter
+    private Supplier<IRecipeHandlerTrait<K>> handlerSupplier;
 
     public WrappedRecipeHandlerTrait(IO handlerIO, RecipeCapability<K> capability) {
         this.handlerIO = handlerIO;
