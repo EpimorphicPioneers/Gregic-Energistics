@@ -26,6 +26,26 @@ public class GregicEng extends MOMod<CommonProxy> {
         super();
     }
 
+    public static ResourceLocation id(String path) {
+        return new ResourceLocation(MODID, FormattingUtil.toLowerCaseUnder(path));
+    }
+
+    public static Logger logger() {
+        return instance.getLogger();
+    }
+
+    public static CommonProxy proxy() {
+        return instance.getProxy();
+    }
+
+    public static MORegistrate registrate() {
+        return instance.getRegistrate();
+    }
+
+    public static INetworking network() {
+        return instance.getNetwork();
+    }
+
     @Override
     public String getModId() {
         return MODID;
@@ -57,26 +77,6 @@ public class GregicEng extends MOMod<CommonProxy> {
     @Override
     public void addDataGenerator(MORegistrate registrate) {
         registrate.addDataGenerator(MOProviderTypes.MO_LANG, GELangHandler::init);
-    }
-
-    public static ResourceLocation id(String path) {
-        return new ResourceLocation(MODID, FormattingUtil.toLowerCaseUnder(path));
-    }
-
-    public static Logger logger() {
-        return instance.getLogger();
-    }
-
-    public static CommonProxy proxy() {
-        return instance.getProxy();
-    }
-
-    public static MORegistrate registrate() {
-        return instance.getRegistrate();
-    }
-
-    public static INetworking network() {
-        return instance.getNetwork();
     }
 
 }

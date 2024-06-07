@@ -34,7 +34,7 @@ public class GregicEngUtils {
     }
 
     public static Pair<Object2LongOpenHashMap<Item>, Object2LongOpenHashMap<Fluid>> mergeInternalSlot(
-        CraftingIOBufferPartMachine.InternalSlot[] internalSlots
+            CraftingIOBufferPartMachine.InternalSlot[] internalSlots
     ) {
         Object2LongOpenHashMap<Item> items = new Object2LongOpenHashMap<>();
         Object2LongOpenHashMap<Fluid> fluids = new Object2LongOpenHashMap<>();

@@ -74,7 +74,11 @@ public class GEMachines {
         .rotationState(RotationState.ALL)
         .abilities(GEConfigHolder.INSTANCE.enableMoreAbility ? ALL_BUFFER_ABILITIES : new PartAbility[] {PartAbility.IMPORT_ITEMS})
         .overlayTieredHullRenderer("crafting_io_buffer")
-        .tooltips(Component.translatable("block.gregiceng.crafting_io_buffer.desc.0"))
+        .tooltips(
+            Component.translatable("block.gregiceng.crafting_io_buffer.desc.0"),
+            Component.translatable("block.gregiceng.crafting_io_buffer.desc.1"),
+            Component.translatable("block.gregiceng.crafting_io_buffer.desc.2")
+        )
         .register();
 
     public static final MachineDefinition CRAFTING_IO_SLAVE = registrate().machine("crafting_io_slave", CraftingIOSlavePartMachine::new)
@@ -82,7 +86,12 @@ public class GEMachines {
         .rotationState(RotationState.ALL)
         .abilities(GEConfigHolder.INSTANCE.enableMoreAbility ? ALL_BUFFER_ABILITIES : new PartAbility[] {PartAbility.IMPORT_ITEMS})
         .overlayTieredHullRenderer("crafting_io_slave")
-        .tooltips(Component.translatable("block.gregiceng.crafting_io_slave.desc.0"))
+        .tooltips(
+            Component.translatable("block.gregiceng.crafting_io_slave.desc.0"),
+            Component.translatable("block.gregiceng.crafting_io_slave.desc.1"),
+            Component.translatable("block.gregiceng.crafting_io_slave.desc.2"),
+            Component.translatable("block.gregiceng.crafting_io_slave.desc.3")
+        )
         .register();
 
     public static final MachineDefinition[] INPUT_BUFFER = registerTieredGEMachines("input_buffer",

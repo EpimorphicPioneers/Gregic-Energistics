@@ -44,13 +44,8 @@ import java.util.Set;
 @MethodsReturnNonnullByDefault
 public class BufferPartMachine extends TieredIOPartMachine implements IDistinctPart, IMachineModifyDrops {
 
-    protected static final ManagedFieldHolder MANAGED_FIELD_HOLDER = new ManagedFieldHolder(BufferPartMachine.class, TieredIOPartMachine.MANAGED_FIELD_HOLDER);
-
     public static final long INITIAL_TANK_CAPACITY = 4 * FluidHelper.getBucket();
-
-    @Getter
-    @Persisted
-    private final NotifiableItemStackHandler inventory;
+    protected static final ManagedFieldHolder MANAGED_FIELD_HOLDER = new ManagedFieldHolder(BufferPartMachine.class, TieredIOPartMachine.MANAGED_FIELD_HOLDER);
     @Persisted
     public final NotifiableFluidTank tank;
     @Getter
@@ -58,6 +53,9 @@ public class BufferPartMachine extends TieredIOPartMachine implements IDistinctP
     protected final NotifiableItemStackHandler circuitInventory;
     @Getter
     protected final ItemHandlerProxyRecipeTrait combinedInventory;
+    @Getter
+    @Persisted
+    private final NotifiableItemStackHandler inventory;
     @Nullable
     protected TickableSubscription autoIOSubs;
     @Nullable
@@ -80,13 +78,13 @@ public class BufferPartMachine extends TieredIOPartMachine implements IDistinctP
     //*****     Initialization    ******//
     //////////////////////////////////////
 
+    public static long getTankCapacity(long initialCapacity, int tier) {
+        return initialCapacity * (1L << Math.min(9, tier));
+    }
+
     protected int getInventorySize() {
         int sizeRoot = 1 + Math.min(9, getTier());
         return sizeRoot * sizeRoot;
-    }
-
-    public static long getTankCapacity(long initialCapacity, int tier) {
-        return initialCapacity * (1L << Math.min(9, tier));
     }
 
     protected NotifiableItemStackHandler createInventory(Object... args) {
@@ -177,7 +175,7 @@ public class BufferPartMachine extends TieredIOPartMachine implements IDistinctP
                     if (hasFluidTransfer) {
                         tank.exportToNearby(getFrontFacing());
                     }
-                } else if (io == IO.IN){
+                } else if (io == IO.IN) {
                     if (hasItemTransfer) {
                         getInventory().importFromNearby(getFrontFacing());
                     }
