@@ -21,7 +21,7 @@ dependencyResolutionManagement {
         def jeiVersion = "15.2.0.27"
         def reiVersion = "12.0.684"
         def emiVersion = "1.1.4"
-        def ae2Version = "15.2.1"
+        def ae2Version = "15.2.2"
         def gtmVersion = "1.2.3.a"
 
         // Forge
@@ -39,7 +39,7 @@ dependencyResolutionManagement {
         def configurationVersion = "2.2.0"
         def ldLibVersion = "1.0.25.j"
         def mixinextrasVersion = "0.3.2"
-        def monomorphismLibVersion = "1.0.10-build.19"
+        def monomorphismLibVersion = "1.1.0-build.23"
 
         forge {
             version("forgeShortVersion", forgeVersion)

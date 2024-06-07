@@ -1,8 +1,8 @@
 package com.epimorphismmc.gregiceng.integration.jade.provider;
 
 import com.epimorphismmc.gregiceng.GregicEng;
-import com.epimorphismmc.gregiceng.common.machine.multiblock.part.CraftingIOBufferPartMachine;
-import com.epimorphismmc.gregiceng.util.CraftingIOBufferUtil;
+import com.epimorphismmc.gregiceng.common.machine.multiblock.part.appeng.CraftingIOBufferPartMachine;
+import com.epimorphismmc.gregiceng.utils.GregicEngUtils;
 import com.gregtechceu.gtceu.api.blockentity.MetaMachineBlockEntity;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
@@ -61,7 +61,7 @@ public enum CraftingIOBufferProvider implements IBlockComponentProvider, IServer
     public void appendServerData(CompoundTag compoundTag, BlockAccessor blockAccessor) {
         if (blockAccessor.getBlockEntity() instanceof MetaMachineBlockEntity machineBlockEntity) {
             if (machineBlockEntity.getMetaMachine() instanceof CraftingIOBufferPartMachine buffer) {
-                var merged = CraftingIOBufferUtil.mergeInternalSlot(buffer.getInternalInventory());
+                var merged = GregicEngUtils.mergeInternalSlot(buffer.getInternalInventory());
                 var items = merged.getLeft();
                 var fluids = merged.getRight();
 

@@ -1,6 +1,7 @@
-package com.epimorphismmc.gregiceng.common.machine.multiblock.part;
+package com.epimorphismmc.gregiceng.common.machine.multiblock.part.appeng;
 
 import com.epimorphismmc.gregiceng.GregicEng;
+import com.epimorphismmc.gregiceng.api.machine.trait.WrappedRecipeHandlerTrait;
 import com.gregtechceu.gtceu.api.GTValues;
 import com.gregtechceu.gtceu.api.capability.recipe.FluidRecipeCapability;
 import com.gregtechceu.gtceu.api.capability.recipe.IO;

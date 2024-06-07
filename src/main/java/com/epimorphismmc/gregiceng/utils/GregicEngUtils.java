@@ -1,13 +1,12 @@
-package com.epimorphismmc.gregiceng.util;
+package com.epimorphismmc.gregiceng.utils;
 
-import com.epimorphismmc.gregiceng.common.machine.multiblock.part.CraftingIOBufferPartMachine;
+import com.epimorphismmc.gregiceng.common.machine.multiblock.part.appeng.CraftingIOBufferPartMachine;
 import com.gregtechceu.gtceu.api.capability.recipe.FluidRecipeCapability;
 import com.gregtechceu.gtceu.api.capability.recipe.ItemRecipeCapability;
 import com.gregtechceu.gtceu.api.recipe.ingredient.FluidIngredient;
 import com.lowdragmc.lowdraglib.side.fluid.FluidStack;
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -17,8 +16,7 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.List;
 
-public class CraftingIOBufferUtil {
-
+public class GregicEngUtils {
     public static List<Ingredient> copyIngredients(List<Ingredient> ingredients) {
         List<Ingredient> result = new ObjectArrayList<>(ingredients.size());
         for (Ingredient ingredient : ingredients) {

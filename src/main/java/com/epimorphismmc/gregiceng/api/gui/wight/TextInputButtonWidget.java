@@ -11,18 +11,17 @@ import com.lowdragmc.lowdraglib.utils.Size;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import net.minecraft.network.chat.Component;
 
 import java.util.function.Consumer;
 
+@Accessors(chain = true)
 public class TextInputButtonWidget extends WidgetGroup {
-
     @Setter
-    @Accessors(chain = true)
     private Consumer<String> onConfirm;
-    @Setter
-    @Accessors(chain = true)
-    @Getter
+    @Getter @Setter
     private String text = "";
+    private Component[] hoverTexts = new Component[0];
     @Getter
     private boolean isInputting;
     private TextFieldWidget textField;
@@ -42,6 +41,11 @@ public class TextInputButtonWidget extends WidgetGroup {
         super(position, size);
     }
 
+    public TextInputButtonWidget setButtonTooltips(Component... tooltipTexts) {
+        this.hoverTexts = tooltipTexts;
+        return this;
+    }
+
     @Override
     public void initWidget() {
         super.initWidget();
@@ -59,6 +63,6 @@ public class TextInputButtonWidget extends WidgetGroup {
         }).setTexture(
             new GuiTextureGroup(GuiTextures.VANILLA_BUTTON, new TextTexture("✎")),
             new GuiTextureGroup(GuiTextures.VANILLA_BUTTON, new TextTexture("✎"))
-        ));
+        ).setHoverTooltips(hoverTexts));
     }
 }

@@ -1,4 +1,4 @@
-package com.epimorphismmc.gregiceng.common.machine.multiblock.part;
+package com.epimorphismmc.gregiceng.api.machine.trait;
 
 import com.gregtechceu.gtceu.api.capability.recipe.IO;
 import com.gregtechceu.gtceu.api.capability.recipe.IRecipeCapabilityHolder;
