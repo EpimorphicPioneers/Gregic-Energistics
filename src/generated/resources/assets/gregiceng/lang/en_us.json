@@ -33,6 +33,8 @@
   "block.gregiceng.zpm_output_buffer": "§cZPM Output Buffer",
   "config.gregiceng.option.enableMoreAbility": "Enable More Ability for Crafting IO Buffer/Slave",
   "config.jade.plugin_gregiceng.crafting_io_buffer": "Crafting IO Buffer",
+  "gui.gregiceng.auto_pull_me.desc.disabled": "Automatic Return is disabled",
+  "gui.gregiceng.auto_pull_me.desc.enabled": "Automatic Return is on",
   "gui.gregiceng.automatic_return.desc.disabled": "Automatic Return is disabled",
   "gui.gregiceng.automatic_return.desc.enabled": "Automatic Return is on",
   "gui.gregiceng.refund_all.desc": "Refund raw materials in full",
