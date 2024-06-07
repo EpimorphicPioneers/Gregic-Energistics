@@ -16,12 +16,14 @@ public class GELangHandler {
             "ME Crafting IO Buffer",
             "ME样板IO总成",
             List.of(
-                ""
+                "Must be connected to the ME network and can contain 54 patten",
+                "Having 9 items and fluid catalyst slots",
+                "Allow flow back to the network"
             ),
             List.of(
-                "需与ME网络连接，可容纳54个样板，支持流体与物品的处理样板",
-                "分别拥有9个物品和流体的不消耗品槽",
-                "允许产物直接回流至网络"
+                "需与ME网络连接，可容纳54个样板",
+                "拥有9个物品和流体催化剂槽",
+                "允许回流至网络"
             ));
 
         provider.addBlockWithTooltip(CRAFTING_IO_SLAVE::getBlock,
@@ -41,40 +43,44 @@ public class GELangHandler {
             "ME Stocking Input Bus",
             "ME存储输入总线",
             List.of(
-
+                "Using items in the ME network to provide items to multi block structures"
             ),
             List.of(
-
+                "使用ME网络中的物品向多方块结构提供物品"
             ));
 
         provider.addBlockWithTooltip(STOCKING_HATCH::getBlock,
             "ME Stocking Input Hatch",
             "ME存储输入仓",
             List.of(
-
+                "Using fluids in the ME network to provide fluids to multi block structures"
             ),
             List.of(
-
+                "使用ME网络中的流体向多方块结构提供流体"
             ));
 
         provider.addBlockWithTooltip(ADV_STOCKING_BUS::getBlock,
             "ME Advanced Stocking Input Bus",
             "ME进阶存储输入总线",
             List.of(
-
+                "Using items in the ME network to provide items to multi block structures",
+                "Has Automatic pull mode"
             ),
             List.of(
-
+                "使用ME网络中的物品向多方块结构提供物品",
+                "拥有自动拉取功能"
             ));
 
         provider.addBlockWithTooltip(ADV_STOCKING_HATCH::getBlock,
             "ME Advanced Stocking Input Hatch",
             "ME进阶存储输入仓",
             List.of(
-
+                "Using fluids in the ME network to provide fluids to multi block structures",
+                "Has Automatic pull mode"
             ),
             List.of(
-
+                "使用ME网络中的流体向多方块结构提供流体",
+                "拥有自动拉取功能"
             ));
 
         provider.addTieredMachineName("input_buffer", "输入总成", MULTI_HATCH_TIERS);
@@ -113,11 +119,11 @@ public class GELangHandler {
             "自动回流已禁用");
 
         provider.add("gui.gregiceng.auto_pull_me.desc.enabled",
-            "Automatic Return is on",
-            "自动回流已开启");
+            "Automatic pull is on",
+            "自动拉取已开启");
         provider.add("gui.gregiceng.auto_pull_me.desc.disabled",
-            "Automatic Return is disabled",
-            "自动回流已禁用");
+            "Automatic pull is disabled",
+            "自动拉取已禁用");
 
         provider.add("gui.gregiceng.rename.desc",
             "Rename",

@@ -58,7 +58,10 @@ public class GEMachines {
         .rotationState(RotationState.ALL)
         .abilities(PartAbility.IMPORT_ITEMS)
         .overlayTieredHullRenderer("adv_stocking_bus")
-        .tooltips(Component.translatable("block.gregiceng.adv_stocking_bus.desc.0"))
+        .tooltips(
+            Component.translatable("block.gregiceng.adv_stocking_bus.desc.0"),
+            Component.translatable("block.gregiceng.adv_stocking_bus.desc.1")
+        )
         .register();
 
     public static final MachineDefinition ADV_STOCKING_HATCH = registrate().machine("adv_stocking_hatch", AdvStockingHatchPartMachine::new)
@@ -66,7 +69,10 @@ public class GEMachines {
         .rotationState(RotationState.ALL)
         .abilities(PartAbility.IMPORT_FLUIDS)
         .overlayTieredHullRenderer("adv_stocking_hatch")
-        .tooltips(Component.translatable("block.gregiceng.adv_stocking_hatch.desc.0"))
+        .tooltips(
+            Component.translatable("block.gregiceng.adv_stocking_hatch.desc.0"),
+            Component.translatable("block.gregiceng.adv_stocking_hatch.desc.1")
+        )
         .register();
 
     public static final MachineDefinition CRAFTING_IO_BUFFER = registrate().machine("crafting_io_buffer", CraftingIOBufferPartMachine::new)

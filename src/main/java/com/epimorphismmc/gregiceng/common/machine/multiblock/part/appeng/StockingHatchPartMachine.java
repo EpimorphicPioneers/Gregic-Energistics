@@ -1,8 +1,11 @@
 package com.epimorphismmc.gregiceng.common.machine.multiblock.part.appeng;
 
 import appeng.api.networking.IGridNodeListener;
+import appeng.api.networking.IStackWatcher;
 import appeng.api.networking.security.IActionSource;
+import appeng.api.networking.storage.IStorageWatcherNode;
 import appeng.api.stacks.AEFluidKey;
+import appeng.api.stacks.AEKey;
 import appeng.me.ManagedGridNode;
 import com.epimorphismmc.gregiceng.api.machine.feature.multiblock.IMEStockingHatch;
 import com.epimorphismmc.gregiceng.api.misc.ConfigurableAESlot;
@@ -124,6 +127,20 @@ public class StockingHatchPartMachine extends MEPartMachine implements IMEStocki
         private final SerializableFluidTransferList tanks;
         private FluidStorage[] fluidStorages;
 
+        private IStackWatcher storageWatcher;
+        private final IStorageWatcherNode stackWatcherNode = new IStorageWatcherNode() {
+            @Override
+            public void updateWatcher(IStackWatcher newWatcher) {
+                storageWatcher = newWatcher;
+                configureWatchers();
+            }
+
+            @Override
+            public void onStackChange(AEKey what, long amount) {
+                notifyListeners();
+            }
+        };
+
         public ExportOnlyAEFluidList(MetaMachine machine, int slots) {
             super(machine);
             var storages = new ExportOnlyAEFluid[slots];
@@ -133,6 +150,15 @@ public class StockingHatchPartMachine extends MEPartMachine implements IMEStocki
             }
             this.tanks = new SerializableFluidTransferList(storages);
             this.fluidStorages = null;
+
+            getMainNode().addService(IStorageWatcherNode.class, stackWatcherNode);
+        }
+
+        @Override
+        public void onChanged() {
+            super.onChanged();
+            notifyListeners();
+            configureWatchers();
         }
 
         @Override
@@ -209,6 +235,15 @@ public class StockingHatchPartMachine extends MEPartMachine implements IMEStocki
         @Override
         public ManagedFieldHolder getFieldHolder() {
             return MANAGED_FIELD_HOLDER;
+        }
+
+        private void configureWatchers() {
+            if (storageWatcher != null) {
+                storageWatcher.reset();
+                for (AEFluidKey aeItemKey : getAEKeySet()) {
+                    storageWatcher.add(aeItemKey);
+                }
+            }
         }
 
         private static class WrappedFluidStorage extends FluidStorage {

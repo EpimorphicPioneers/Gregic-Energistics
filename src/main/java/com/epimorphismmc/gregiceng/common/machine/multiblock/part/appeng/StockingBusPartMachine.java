@@ -1,8 +1,11 @@
 package com.epimorphismmc.gregiceng.common.machine.multiblock.part.appeng;
 
 import appeng.api.networking.IGridNodeListener;
+import appeng.api.networking.IStackWatcher;
 import appeng.api.networking.security.IActionSource;
+import appeng.api.networking.storage.IStorageWatcherNode;
 import appeng.api.stacks.AEItemKey;
+import appeng.api.stacks.AEKey;
 import appeng.me.ManagedGridNode;
 import com.epimorphismmc.gregiceng.api.machine.feature.multiblock.IMEStockingBus;
 import com.epimorphismmc.gregiceng.api.misc.ConfigurableAESlot;
@@ -179,6 +182,20 @@ public class StockingBusPartMachine extends MEPartMachine implements IMEStocking
         @Persisted
         ItemTransferList inventory;
 
+        private IStackWatcher storageWatcher;
+        private final IStorageWatcherNode stackWatcherNode = new IStorageWatcherNode() {
+            @Override
+            public void updateWatcher(IStackWatcher newWatcher) {
+                storageWatcher = newWatcher;
+                configureWatchers();
+            }
+
+            @Override
+            public void onStackChange(AEKey what, long amount) {
+                notifyListeners();
+            }
+        };
+
         public ExportOnlyAEItemList(MetaMachine holder, int slots) {
             super(holder);
             var transfers = new ExportOnlyAEItem[slots];
@@ -187,6 +204,15 @@ public class StockingBusPartMachine extends MEPartMachine implements IMEStocking
                 transfers[i].setOnContentsChanged(this::onChanged);
             }
             this.inventory = new SerializableItemTransferList(transfers);
+
+            getMainNode().addService(IStorageWatcherNode.class, stackWatcherNode);
+        }
+
+        @Override
+        public void onChanged() {
+            super.onChanged();
+            notifyListeners();
+            configureWatchers();
         }
 
         @Override
@@ -265,6 +291,15 @@ public class StockingBusPartMachine extends MEPartMachine implements IMEStocking
         @Override
         public ManagedFieldHolder getFieldHolder() {
             return MANAGED_FIELD_HOLDER;
+        }
+
+        private void configureWatchers() {
+            if (storageWatcher != null) {
+                storageWatcher.reset();
+                for (AEItemKey aeItemKey : getAEKeySet()) {
+                    storageWatcher.add(aeItemKey);
+                }
+            }
         }
     }
 
