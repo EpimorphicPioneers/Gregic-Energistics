@@ -41,6 +41,7 @@
   "block.gregiceng.zpm_output_buffer": "§cZPM Output Buffer",
   "config.gregiceng.option.enableMoreAbility": "Enable More Ability for Crafting IO Buffer/Slave",
   "config.jade.plugin_gregiceng.crafting_io_buffer": "Crafting IO Buffer",
+  "gregiceng.tooltip.buffer_bind": "Bind to X: %s, Y: %s, Z: %s Crafting IO Buffer",
   "gui.gregiceng.auto_pull_me.desc.disabled": "Automatic pull is disabled",
   "gui.gregiceng.auto_pull_me.desc.enabled": "Automatic pull is on",
   "gui.gregiceng.automatic_return.desc.disabled": "Automatic Return is disabled",
