@@ -8,7 +8,6 @@ import com.epimorphismmc.gregiceng.api.misc.SerializableFluidTransferList;
 import com.epimorphismmc.monomorphism.ae2.AEUtils;
 import com.epimorphismmc.monomorphism.ae2.MEPartMachine;
 
-import appeng.api.networking.IGridNodeListener;
 import appeng.api.networking.IStackWatcher;
 import appeng.api.networking.security.IActionSource;
 import appeng.api.networking.storage.IStorageWatcherNode;
@@ -23,7 +22,6 @@ import com.gregtechceu.gtceu.api.capability.recipe.RecipeCapability;
 import com.gregtechceu.gtceu.api.gui.fancy.ConfiguratorPanel;
 import com.gregtechceu.gtceu.api.machine.IMachineBlockEntity;
 import com.gregtechceu.gtceu.api.machine.MetaMachine;
-import com.gregtechceu.gtceu.api.machine.TickableSubscription;
 import com.gregtechceu.gtceu.api.machine.feature.multiblock.IMultiController;
 import com.gregtechceu.gtceu.api.machine.feature.multiblock.IMultiPart;
 import com.gregtechceu.gtceu.api.machine.trait.NotifiableRecipeHandlerTrait;
@@ -62,8 +60,6 @@ public class StockingHatchPartMachine extends MEPartMachine implements IMEStocki
     @Persisted
     protected final ExportOnlyAEFluidList tanks;
 
-    @Nullable protected TickableSubscription updateSubs;
-
     public StockingHatchPartMachine(IMachineBlockEntity holder, Object... args) {
         super(holder, GTValues.EV, IO.IN, args);
         this.tanks = new ExportOnlyAEFluidList(this, 5 * 5);
@@ -75,12 +71,6 @@ public class StockingHatchPartMachine extends MEPartMachine implements IMEStocki
         if (getLevel() instanceof ServerLevel serverLevel) {
             serverLevel.getServer().tell(new TickTask(1, this::validateConfig));
         }
-    }
-
-    @Override
-    public void onMainNodeStateChanged(IGridNodeListener.State reason) {
-        super.onMainNodeStateChanged(reason);
-        this.updateSubscription();
     }
 
     @Override
@@ -105,16 +95,9 @@ public class StockingHatchPartMachine extends MEPartMachine implements IMEStocki
         return true;
     }
 
-    protected void updateSubscription() {
-        if (getMainNode().isOnline()) {
-            updateSubs = subscribeServerTick(updateSubs, this::update);
-        } else if (updateSubs != null) {
-            updateSubs.unsubscribe();
-            updateSubs = null;
-        }
-    }
-
-    protected void update() {}
+    //////////////////////////////////////
+    // **********     GUI     ***********//
+    //////////////////////////////////////
 
     @Override
     public void attachConfigurators(ConfiguratorPanel configuratorPanel) {}

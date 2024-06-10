@@ -88,7 +88,7 @@ public abstract class ConfigSlotWidget<T extends AEKey> extends Widget
     protected List<Component> getHoverTexts(List<Component> hoverTexts) {
         if (getConfig() == null) {
             if (isBlocked.getAsBoolean()) {
-
+                hoverTexts.add(Component.translatable("gui.gregiceng.config_disabled.desc"));
             } else {
                 hoverTexts.add(Component.translatable("gtceu.gui.config_slot"));
                 hoverTexts.add(Component.translatable("gtceu.gui.config_slot.set"));

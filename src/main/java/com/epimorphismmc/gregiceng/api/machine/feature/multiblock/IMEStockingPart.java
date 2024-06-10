@@ -8,6 +8,7 @@ import com.epimorphismmc.gregiceng.api.misc.IConfigurableAESlotList;
 import appeng.api.stacks.AEKey;
 
 import com.gregtechceu.gtceu.api.gui.GuiTextures;
+import com.gregtechceu.gtceu.api.machine.MetaMachine;
 import com.gregtechceu.gtceu.api.machine.feature.IFancyUIMachine;
 
 import com.lowdragmc.lowdraglib.gui.widget.ImageWidget;
@@ -19,6 +20,13 @@ import org.jetbrains.annotations.Nullable;
 
 public interface IMEStockingPart<T extends AEKey> extends IFancyUIMachine {
     int CONFIG_SIZE = 5 * 5;
+
+    static boolean isActive(MetaMachine machine) {
+        if (machine instanceof IMEStockingPart<?> stockingPart) {
+            return stockingPart.isOnline();
+        }
+        return false;
+    }
 
     @Override
     default Widget createUIWidget() {

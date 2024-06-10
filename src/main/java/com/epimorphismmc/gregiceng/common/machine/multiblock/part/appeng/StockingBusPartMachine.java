@@ -8,7 +8,6 @@ import com.epimorphismmc.gregiceng.api.misc.SerializableItemTransferList;
 import com.epimorphismmc.monomorphism.ae2.MEPartMachine;
 import com.epimorphismmc.monomorphism.machine.fancyconfigurator.InventoryFancyConfigurator;
 
-import appeng.api.networking.IGridNodeListener;
 import appeng.api.networking.IStackWatcher;
 import appeng.api.networking.security.IActionSource;
 import appeng.api.networking.storage.IStorageWatcherNode;
@@ -25,7 +24,6 @@ import com.gregtechceu.gtceu.api.gui.fancy.ConfiguratorPanel;
 import com.gregtechceu.gtceu.api.gui.fancy.IFancyConfiguratorButton;
 import com.gregtechceu.gtceu.api.machine.IMachineBlockEntity;
 import com.gregtechceu.gtceu.api.machine.MetaMachine;
-import com.gregtechceu.gtceu.api.machine.TickableSubscription;
 import com.gregtechceu.gtceu.api.machine.fancyconfigurator.CircuitFancyConfigurator;
 import com.gregtechceu.gtceu.api.machine.feature.multiblock.IMultiController;
 import com.gregtechceu.gtceu.api.machine.feature.multiblock.IMultiPart;
@@ -87,8 +85,6 @@ public class StockingBusPartMachine extends MEPartMachine implements IMEStocking
     @Getter
     protected final ItemHandlerProxyRecipeTrait combinedInventory;
 
-    @Nullable protected TickableSubscription updateSubs;
-
     public StockingBusPartMachine(IMachineBlockEntity holder, Object... args) {
         super(holder, GTValues.EV, IO.IN, args);
         this.inventory = new ExportOnlyAEItemList(this, 5 * 5);
@@ -108,27 +104,10 @@ public class StockingBusPartMachine extends MEPartMachine implements IMEStocking
     }
 
     @Override
-    public void onMainNodeStateChanged(IGridNodeListener.State reason) {
-        super.onMainNodeStateChanged(reason);
-        this.updateSubscription();
-    }
-
-    @Override
     public void onLoad() {
         super.onLoad();
         combinedInventory.recomputeEnabledState();
     }
-
-    protected void updateSubscription() {
-        if (getMainNode().isOnline()) {
-            updateSubs = subscribeServerTick(updateSubs, this::update);
-        } else if (updateSubs != null) {
-            updateSubs.unsubscribe();
-            updateSubs = null;
-        }
-    }
-
-    protected void update() {}
 
     @Override
     public boolean isDistinct() {
@@ -144,6 +123,10 @@ public class StockingBusPartMachine extends MEPartMachine implements IMEStocking
             validateConfig();
         }
     }
+
+    //////////////////////////////////////
+    // **********     GUI     ***********//
+    //////////////////////////////////////
 
     @Override
     public void attachConfigurators(ConfiguratorPanel configuratorPanel) {

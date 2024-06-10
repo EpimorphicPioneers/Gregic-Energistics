@@ -4,7 +4,7 @@
   "textures": {
     "particle": "gtceu:block/overlay/machine/overlay_hatch",
     "overlay_hatch": "gtceu:block/overlay/machine/overlay_pipe_out",
-    "overlay_item_hatch": "gtceu:block/overlay/machine/overlay_item_hatch"
+    "overlay_item_hatch": "gregiceng:block/overlay/machine/overlay_buffer"
   },
   "elements": [
     {

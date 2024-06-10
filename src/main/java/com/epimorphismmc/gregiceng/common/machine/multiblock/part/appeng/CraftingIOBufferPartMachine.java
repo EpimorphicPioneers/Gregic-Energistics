@@ -273,18 +273,22 @@ public class CraftingIOBufferPartMachine extends MEPartMachine
                         (clickData, pressed) -> this.setWorkingEnabled(pressed))
                 .setTooltipsSupplier(pressed -> List.of(Component.translatable(
                         pressed
-                                ? "gui.gregiceng.automatic_return.desc.enabled"
-                                : "gui.gregiceng.automatic_return.desc.disabled"))));
+                                ? "gui.gregiceng.auto_return.desc.enabled"
+                                : "gui.gregiceng.auto_return.desc.disabled"))));
         configuratorPanel.attachConfigurators(new ButtonConfigurator(
                         new GuiTextureGroup(GuiTextures.BUTTON, GEGuiTextures.REFUND_OVERLAY), this::refundAll)
                 .setTooltips(List.of(Component.translatable("gui.gregiceng.refund_all.desc"))));
         configuratorPanel.attachConfigurators(new CircuitFancyConfigurator(circuitInventory.storage));
         configuratorPanel.attachConfigurators(new InventoryFancyConfigurator(
                         shareInventory.storage, Component.translatable("gui.gregiceng.share_inventory.title"))
-                .setTooltips(List.of(Component.translatable("gui.gregiceng.share_inventory.desc"))));
+                .setTooltips(List.of(
+                        Component.translatable("gui.gregiceng.share_inventory.desc.0"),
+                        Component.translatable("gui.gregiceng.share_inventory.desc.1"))));
         configuratorPanel.attachConfigurators(new TankFancyConfigurator(
                         shareTank.getStorages(), Component.translatable("gui.gregiceng.share_tank.title"))
-                .setTooltips(List.of(Component.translatable("gui.gregiceng.share_tank.desc"))));
+                .setTooltips(List.of(
+                        Component.translatable("gui.gregiceng.share_tank.desc.0"),
+                        Component.translatable("gui.gregiceng.share_inventory.desc.1"))));
     }
 
     @Override

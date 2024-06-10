@@ -3,6 +3,7 @@ package com.epimorphismmc.gregiceng.common.machine.multiblock.part.appeng;
 import com.epimorphismmc.gregiceng.api.gui.wight.ConfigSlotWidget;
 import com.epimorphismmc.gregiceng.api.machine.feature.multiblock.IAutoPullPart;
 
+import appeng.api.networking.IGridNodeListener;
 import appeng.api.stacks.AEItemKey;
 import appeng.api.stacks.AEKey;
 
@@ -10,6 +11,7 @@ import com.gregtechceu.gtceu.api.GTValues;
 import com.gregtechceu.gtceu.api.capability.recipe.IO;
 import com.gregtechceu.gtceu.api.gui.fancy.ConfiguratorPanel;
 import com.gregtechceu.gtceu.api.machine.IMachineBlockEntity;
+import com.gregtechceu.gtceu.api.machine.TickableSubscription;
 import com.gregtechceu.gtceu.api.machine.feature.multiblock.IMultiController;
 
 import com.lowdragmc.lowdraglib.syncdata.annotation.Persisted;
@@ -20,6 +22,7 @@ import net.minecraft.MethodsReturnNonnullByDefault;
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import lombok.Getter;
 import lombok.Setter;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Predicate;
 
@@ -37,6 +40,8 @@ public class AdvStockingBusPartMachine extends StockingBusPartMachine implements
     private long minPullAmount;
 
     private Predicate<AEItemKey> autoPullTest;
+
+    @Nullable protected TickableSubscription updateSubs;
 
     public AdvStockingBusPartMachine(IMachineBlockEntity holder, Object... args) {
         super(holder, GTValues.IV, IO.IN, args);
@@ -75,8 +80,21 @@ public class AdvStockingBusPartMachine extends StockingBusPartMachine implements
     }
 
     @Override
-    public void update() {
-        super.update();
+    public void onMainNodeStateChanged(IGridNodeListener.State reason) {
+        super.onMainNodeStateChanged(reason);
+        this.updateSubscription();
+    }
+
+    protected void updateSubscription() {
+        if (getMainNode().isOnline()) {
+            updateSubs = subscribeServerTick(updateSubs, this::update);
+        } else if (updateSubs != null) {
+            updateSubs.unsubscribe();
+            updateSubs = null;
+        }
+    }
+
+    protected void update() {
         if (!isRemote() && isWorkingEnabled() && getOffsetTimer() % 100 == 0) {
             refreshList();
         }
@@ -101,15 +119,19 @@ public class AdvStockingBusPartMachine extends StockingBusPartMachine implements
         }
     }
 
-    @Override
-    public ConfigSlotWidget<AEItemKey> createConfigSlot(int index, int x, int y) {
-        return super.createConfigSlot(index, x, y).setIsBlocked(this::isWorkingEnabled);
-    }
+    //////////////////////////////////////
+    // **********     GUI     ***********//
+    //////////////////////////////////////
 
     @Override
     public void attachConfigurators(ConfiguratorPanel configuratorPanel) {
         IAutoPullPart.super.attachConfigurators(configuratorPanel);
         super.attachConfigurators(configuratorPanel);
+    }
+
+    @Override
+    public ConfigSlotWidget<AEItemKey> createConfigSlot(int index, int x, int y) {
+        return super.createConfigSlot(index, x, y).setIsBlocked(this::isWorkingEnabled);
     }
 
     @Override

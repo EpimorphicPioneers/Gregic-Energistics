@@ -1,5 +1,7 @@
 package com.epimorphismmc.gregiceng.common.data;
 
+import com.epimorphismmc.gregiceng.GregicEng;
+import com.epimorphismmc.gregiceng.api.machine.feature.multiblock.IMEStockingPart;
 import com.epimorphismmc.gregiceng.common.machine.multiblock.part.BufferPartMachine;
 import com.epimorphismmc.gregiceng.common.machine.multiblock.part.appeng.AdvStockingBusPartMachine;
 import com.epimorphismmc.gregiceng.common.machine.multiblock.part.appeng.AdvStockingHatchPartMachine;
@@ -8,6 +10,8 @@ import com.epimorphismmc.gregiceng.common.machine.multiblock.part.appeng.Craftin
 import com.epimorphismmc.gregiceng.common.machine.multiblock.part.appeng.StockingBusPartMachine;
 import com.epimorphismmc.gregiceng.common.machine.multiblock.part.appeng.StockingHatchPartMachine;
 import com.epimorphismmc.gregiceng.config.GEConfigHolder;
+
+import com.epimorphismmc.monomorphism.client.renderer.machine.CustomWorkableMachineRenderer;
 
 import com.gregtechceu.gtceu.api.capability.recipe.IO;
 import com.gregtechceu.gtceu.api.data.RotationState;
@@ -52,8 +56,11 @@ public class GEMachines {
             .tier(EV)
             .rotationState(RotationState.ALL)
             .abilities(PartAbility.IMPORT_ITEMS)
-            .overlayTieredHullRenderer("stocking_bus")
-            .tooltips(Component.translatable("block.gregiceng.stocking_bus.desc.0"))
+            .renderer(() -> new CustomWorkableMachineRenderer(
+                    EV, GregicEng.id("block/multiblock/part/stocking_bus"), IMEStockingPart::isActive))
+            .tooltips(
+                    Component.translatable("block.gregiceng.stocking_bus.desc.0"),
+                    Component.translatable("gtceu.universal.enabled"))
             .register();
 
     public static final MachineDefinition STOCKING_HATCH = registrate()
@@ -61,8 +68,11 @@ public class GEMachines {
             .tier(EV)
             .rotationState(RotationState.ALL)
             .abilities(PartAbility.IMPORT_FLUIDS)
-            .overlayTieredHullRenderer("stocking_hatch")
-            .tooltips(Component.translatable("block.gregiceng.stocking_hatch.desc.0"))
+            .renderer(() -> new CustomWorkableMachineRenderer(
+                    EV, GregicEng.id("block/multiblock/part/stocking_hatch"), IMEStockingPart::isActive))
+            .tooltips(
+                    Component.translatable("block.gregiceng.stocking_hatch.desc.0"),
+                    Component.translatable("gtceu.universal.enabled"))
             .register();
 
     public static final MachineDefinition ADV_STOCKING_BUS = registrate()
@@ -70,10 +80,13 @@ public class GEMachines {
             .tier(IV)
             .rotationState(RotationState.ALL)
             .abilities(PartAbility.IMPORT_ITEMS)
-            .overlayTieredHullRenderer("adv_stocking_bus")
+            .renderer(() -> new CustomWorkableMachineRenderer(
+                    EV, GregicEng.id("block/multiblock/part/stocking_bus"), IMEStockingPart::isActive))
             .tooltips(
                     Component.translatable("block.gregiceng.adv_stocking_bus.desc.0"),
-                    Component.translatable("block.gregiceng.adv_stocking_bus.desc.1"))
+                    Component.translatable("block.gregiceng.adv_stocking_bus.desc.1"),
+                    Component.translatable("block.gregiceng.adv_stocking_bus.desc.2"),
+                    Component.translatable("gtceu.universal.enabled"))
             .register();
 
     public static final MachineDefinition ADV_STOCKING_HATCH = registrate()
@@ -81,10 +94,13 @@ public class GEMachines {
             .tier(IV)
             .rotationState(RotationState.ALL)
             .abilities(PartAbility.IMPORT_FLUIDS)
-            .overlayTieredHullRenderer("adv_stocking_hatch")
+            .renderer(() -> new CustomWorkableMachineRenderer(
+                    EV, GregicEng.id("block/multiblock/part/stocking_hatch"), IMEStockingPart::isActive))
             .tooltips(
                     Component.translatable("block.gregiceng.adv_stocking_hatch.desc.0"),
-                    Component.translatable("block.gregiceng.adv_stocking_hatch.desc.1"))
+                    Component.translatable("block.gregiceng.adv_stocking_hatch.desc.1"),
+                    Component.translatable("block.gregiceng.adv_stocking_hatch.desc.2"),
+                    Component.translatable("gtceu.universal.enabled"))
             .register();
 
     public static final MachineDefinition CRAFTING_IO_BUFFER = registrate()
@@ -99,7 +115,8 @@ public class GEMachines {
             .tooltips(
                     Component.translatable("block.gregiceng.crafting_io_buffer.desc.0"),
                     Component.translatable("block.gregiceng.crafting_io_buffer.desc.1"),
-                    Component.translatable("block.gregiceng.crafting_io_buffer.desc.2"))
+                    Component.translatable("block.gregiceng.crafting_io_buffer.desc.2"),
+                    Component.translatable("gtceu.universal.enabled"))
             .register();
 
     public static final MachineDefinition CRAFTING_IO_SLAVE = registrate()
@@ -115,7 +132,8 @@ public class GEMachines {
                     Component.translatable("block.gregiceng.crafting_io_slave.desc.0"),
                     Component.translatable("block.gregiceng.crafting_io_slave.desc.1"),
                     Component.translatable("block.gregiceng.crafting_io_slave.desc.2"),
-                    Component.translatable("block.gregiceng.crafting_io_slave.desc.3"))
+                    Component.translatable("block.gregiceng.crafting_io_slave.desc.3"),
+                    Component.translatable("gtceu.universal.enabled"))
             .register();
 
     public static final MachineDefinition[] INPUT_BUFFER = registerTieredGEMachines(
@@ -138,7 +156,8 @@ public class GEMachines {
                                     "gtceu.universal.tooltip.fluid_storage_capacity_mult",
                                     1 + Math.min(9, tier),
                                     FluidHatchPartMachine.getTankCapacity(
-                                            BufferPartMachine.INITIAL_TANK_CAPACITY, tier)))
+                                            BufferPartMachine.INITIAL_TANK_CAPACITY, tier)),
+                            Component.translatable("gtceu.universal.enabled"))
                     .register(),
             MULTI_HATCH_TIERS);
 
@@ -162,7 +181,8 @@ public class GEMachines {
                                     "gtceu.universal.tooltip.fluid_storage_capacity_mult",
                                     1 + Math.min(9, tier),
                                     FluidHatchPartMachine.getTankCapacity(
-                                            BufferPartMachine.INITIAL_TANK_CAPACITY, tier)))
+                                            BufferPartMachine.INITIAL_TANK_CAPACITY, tier)),
+                            Component.translatable("gtceu.universal.enabled"))
                     .register(),
             MULTI_HATCH_TIERS);
 
