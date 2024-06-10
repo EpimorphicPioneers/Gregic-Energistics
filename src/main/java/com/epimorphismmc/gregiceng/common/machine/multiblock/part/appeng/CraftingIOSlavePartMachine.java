@@ -46,7 +46,7 @@ public class CraftingIOSlavePartMachine extends TieredIOPartMachine {
         this.circuitHandler = new WrappedRecipeHandlerTrait<>(IO.IN, ItemRecipeCapability.CAP);
     }
 
-    private boolean setIOBuffer(BlockPos pos) {
+    public boolean setIOBuffer(BlockPos pos) {
         if (pos == null) return false;
         if (MetaMachine.getMachine(getLevel(), pos) instanceof CraftingIOBufferPartMachine) {
             this.pos = pos;

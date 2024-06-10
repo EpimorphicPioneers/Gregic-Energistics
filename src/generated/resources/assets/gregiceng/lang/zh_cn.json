@@ -44,6 +44,7 @@
   "block.gregiceng.zpm_output_buffer": "§cZPM§r输出总成",
   "config.gregiceng.option.enableMoreAbility": "为样板IO总成/镜像启用更多能力",
   "config.jade.plugin_gregiceng.crafting_io_buffer": "样板IO总成",
+  "gregiceng.tooltip.buffer_bind": "绑定至 X: %s, Y: %s, Z: %s 样板IO总成",
   "gui.gregiceng.auto_pull_me.desc.disabled": "自动拉取已禁用",
   "gui.gregiceng.auto_pull_me.desc.enabled": "自动拉取已开启",
   "gui.gregiceng.automatic_return.desc.disabled": "自动回流已禁用",

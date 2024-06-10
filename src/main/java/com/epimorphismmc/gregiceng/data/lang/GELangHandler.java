@@ -127,7 +127,8 @@ public class GELangHandler {
 
         provider.add("gui.gregiceng.rename.desc",
             "Rename",
-            "重命名");
+            "重命名"
+        );
 
         provider.add("config.jade.plugin_gregiceng.crafting_io_buffer",
             "Crafting IO Buffer",
@@ -136,7 +137,13 @@ public class GELangHandler {
 
         provider.add("config.gregiceng.option.enableMoreAbility",
             "Enable More Ability for Crafting IO Buffer/Slave",
-            "为样板IO总成/镜像启用更多能力")
-        ;
+            "为样板IO总成/镜像启用更多能力"
+        );
+
+        provider.add(
+            "gregiceng.tooltip.buffer_bind",
+            "Bind to X: %s, Y: %s, Z: %s Crafting IO Buffer",
+            "绑定至 X: %s, Y: %s, Z: %s 样板IO总成"
+        );
     }
 }
