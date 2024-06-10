@@ -1,18 +1,21 @@
 package com.epimorphismmc.gregiceng.api.gui.wight;
 
-import appeng.api.stacks.AEKey;
 import com.epimorphismmc.gregiceng.api.misc.IConfigurableAESlotList;
+
 import com.lowdragmc.lowdraglib.gui.ingredient.IGhostIngredientTarget;
 import com.lowdragmc.lowdraglib.gui.ingredient.Target;
 import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Size;
-import com.mojang.blaze3d.systems.RenderSystem;
+
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+
+import appeng.api.stacks.AEKey;
+import com.mojang.blaze3d.systems.RenderSystem;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -24,9 +27,10 @@ import java.util.function.Predicate;
 
 import static com.lowdragmc.lowdraglib.gui.util.DrawerHelper.drawSolidRect;
 
-public abstract class ConfigSlotWidget<T extends AEKey> extends Widget implements IGhostIngredientTarget {
-    protected final static int REMOVE_ID = 1000;
-    protected final static int UPDATE_ID = 1001;
+public abstract class ConfigSlotWidget<T extends AEKey> extends Widget
+        implements IGhostIngredientTarget {
+    protected static final int REMOVE_ID = 1000;
+    protected static final int UPDATE_ID = 1001;
     protected static final int BLOCKED_OVERLAY_COLOR = 0x80404040;
     protected static final int SELECTION_OVERLAY_COLOR = -0x7f000001;
     protected final int index;
@@ -35,24 +39,27 @@ public abstract class ConfigSlotWidget<T extends AEKey> extends Widget implement
     protected T latestConfig;
     protected BooleanSupplier isBlocked = () -> false;
 
-    public ConfigSlotWidget(IConfigurableAESlotList<T> slotList, int index, Position pos, Predicate<T> validator) {
+    public ConfigSlotWidget(
+            IConfigurableAESlotList<T> slotList, int index, Position pos, Predicate<T> validator) {
         super(pos, new Size(18, 18));
         this.slotList = slotList;
         this.index = index;
         this.validator = validator;
     }
 
-    public ConfigSlotWidget(IConfigurableAESlotList<T> slotList, int index, int x, int y, Predicate<T> validator) {
+    public ConfigSlotWidget(
+            IConfigurableAESlotList<T> slotList, int index, int x, int y, Predicate<T> validator) {
         this(slotList, index, new Position(x, y), validator);
     }
 
     @OnlyIn(Dist.CLIENT)
     @Override
-    public void drawInForeground(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+    public void drawInForeground(
+            @NotNull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         if (isMouseOverElement(mouseX, mouseY)
-            && getHoverElement(mouseX, mouseY) == this
-            && gui != null
-            && gui.getModularUIGui() != null) {
+                && getHoverElement(mouseX, mouseY) == this
+                && gui != null
+                && gui.getModularUIGui() != null) {
             drawTooltipTexts(mouseX, mouseY);
         }
     }
@@ -60,7 +67,8 @@ public abstract class ConfigSlotWidget<T extends AEKey> extends Widget implement
     @OnlyIn(Dist.CLIENT)
     @Override
     protected void drawTooltipTexts(int mouseX, int mouseY) {
-        gui.getModularUIGui().setHoverTooltip(getHoverTexts(new ArrayList<>()), ItemStack.EMPTY, null, null);
+        gui.getModularUIGui()
+                .setHoverTooltip(getHoverTexts(new ArrayList<>()), ItemStack.EMPTY, null, null);
     }
 
     public ConfigSlotWidget<T> setIsBlocked(BooleanSupplier isBlocked) {
@@ -91,7 +99,8 @@ public abstract class ConfigSlotWidget<T extends AEKey> extends Widget implement
     }
 
     @OnlyIn(Dist.CLIENT)
-    protected static void drawBlockedOverlay(GuiGraphics graphics, int x, int y, int width, int height) {
+    protected static void drawBlockedOverlay(
+            GuiGraphics graphics, int x, int y, int width, int height) {
         RenderSystem.disableDepthTest();
         RenderSystem.colorMask(true, true, true, false);
         drawSolidRect(graphics, x, y, width, height, BLOCKED_OVERLAY_COLOR);
@@ -101,7 +110,8 @@ public abstract class ConfigSlotWidget<T extends AEKey> extends Widget implement
     }
 
     @OnlyIn(Dist.CLIENT)
-    protected static void drawSelectionOverlay(GuiGraphics graphics, int x, int y, int width, int height) {
+    protected static void drawSelectionOverlay(
+            GuiGraphics graphics, int x, int y, int width, int height) {
         RenderSystem.disableDepthTest();
         RenderSystem.colorMask(true, true, true, false);
         drawSolidRect(graphics, x, y, width, height, SELECTION_OVERLAY_COLOR);

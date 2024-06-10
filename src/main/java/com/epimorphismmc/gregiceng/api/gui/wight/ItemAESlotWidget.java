@@ -1,18 +1,22 @@
 package com.epimorphismmc.gregiceng.api.gui.wight;
 
-import appeng.api.stacks.AEItemKey;
 import com.epimorphismmc.gregiceng.api.misc.IConfigurableAESlot;
+
 import com.gregtechceu.gtceu.api.gui.GuiTextures;
+
 import com.lowdragmc.lowdraglib.gui.util.DrawerHelper;
 import com.lowdragmc.lowdraglib.gui.util.TextFormattingUtil;
 import com.lowdragmc.lowdraglib.utils.Position;
-import com.mojang.blaze3d.systems.RenderSystem;
+
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+
+import appeng.api.stacks.AEItemKey;
+import com.mojang.blaze3d.systems.RenderSystem;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -35,12 +39,14 @@ public class ItemAESlotWidget extends AESlotWidget<AEItemKey> {
 
     @OnlyIn(Dist.CLIENT)
     @Override
-    public void drawInForeground(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+    public void drawInForeground(
+            @NotNull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         if (isMouseOverElement(mouseX, mouseY) && getHoverElement(mouseX, mouseY) == this) {
             if (!stack.isEmpty() && gui != null) {
                 List<Component> tips = new ArrayList<>(getToolTips(DrawerHelper.getItemToolTip(stack)));
                 tips.addAll(tooltipTexts);
-                gui.getModularUIGui().setHoverTooltip(tips, stack, null, stack.getTooltipImage().orElse(null));
+                gui.getModularUIGui()
+                        .setHoverTooltip(tips, stack, null, stack.getTooltipImage().orElse(null));
             } else {
                 super.drawInForeground(graphics, mouseX, mouseY, partialTicks);
             }
@@ -51,7 +57,8 @@ public class ItemAESlotWidget extends AESlotWidget<AEItemKey> {
 
     @OnlyIn(Dist.CLIENT)
     @Override
-    public void drawInBackground(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+    public void drawInBackground(
+            @NotNull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         super.drawInBackground(graphics, mouseX, mouseY, partialTicks);
         Position position = getPosition();
         GuiTextures.SLOT.draw(graphics, mouseX, mouseY, position.x, position.y, 18, 18);
@@ -66,7 +73,13 @@ public class ItemAESlotWidget extends AESlotWidget<AEItemKey> {
         drawOverlay(graphics, mouseX, mouseY, partialTicks);
         if (isMouseOverElement(mouseX, mouseY) && getHoverElement(mouseX, mouseY) == this) {
             RenderSystem.colorMask(true, true, true, false);
-            DrawerHelper.drawSolidRect(graphics, getPosition().x + 1, getPosition().y + 1, getSize().width - 2, getSize().height - 2, 0x80FFFFFF);
+            DrawerHelper.drawSolidRect(
+                    graphics,
+                    getPosition().x + 1,
+                    getPosition().y + 1,
+                    getSize().width - 2,
+                    getSize().height - 2,
+                    0x80FFFFFF);
             RenderSystem.colorMask(true, true, true, true);
         }
     }

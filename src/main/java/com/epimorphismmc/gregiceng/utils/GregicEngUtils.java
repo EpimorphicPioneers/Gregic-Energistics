@@ -1,16 +1,20 @@
 package com.epimorphismmc.gregiceng.utils;
 
 import com.epimorphismmc.gregiceng.common.machine.multiblock.part.appeng.CraftingIOBufferPartMachine;
+
 import com.gregtechceu.gtceu.api.capability.recipe.FluidRecipeCapability;
 import com.gregtechceu.gtceu.api.capability.recipe.ItemRecipeCapability;
 import com.gregtechceu.gtceu.api.recipe.ingredient.FluidIngredient;
+
 import com.lowdragmc.lowdraglib.side.fluid.FluidStack;
-import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.material.Fluid;
+
+import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -34,8 +38,7 @@ public class GregicEngUtils {
     }
 
     public static Pair<Object2LongOpenHashMap<Item>, Object2LongOpenHashMap<Fluid>> mergeInternalSlot(
-            CraftingIOBufferPartMachine.InternalSlot[] internalSlots
-    ) {
+            CraftingIOBufferPartMachine.InternalSlot[] internalSlots) {
         Object2LongOpenHashMap<Item> items = new Object2LongOpenHashMap<>();
         Object2LongOpenHashMap<Fluid> fluids = new Object2LongOpenHashMap<>();
         for (CraftingIOBufferPartMachine.InternalSlot internalSlot : internalSlots) {

@@ -1,12 +1,13 @@
 package com.epimorphismmc.gregiceng.api.gui.wight;
 
-import appeng.api.stacks.AEItemKey;
 import com.epimorphismmc.gregiceng.api.misc.IConfigurableAESlotList;
-import com.google.common.collect.Lists;
+
 import com.gregtechceu.gtceu.api.gui.GuiTextures;
+
 import com.lowdragmc.lowdraglib.gui.ingredient.Target;
 import com.lowdragmc.lowdraglib.gui.util.DrawerHelper;
 import com.lowdragmc.lowdraglib.utils.Position;
+
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.network.FriendlyByteBuf;
@@ -14,6 +15,9 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+
+import appeng.api.stacks.AEItemKey;
+import com.google.common.collect.Lists;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
@@ -24,17 +28,27 @@ import static com.lowdragmc.lowdraglib.gui.util.DrawerHelper.drawItemStack;
 
 public class ItemConfigSlotWidget extends ConfigSlotWidget<AEItemKey> {
 
-    public ItemConfigSlotWidget(IConfigurableAESlotList<AEItemKey> slotList, int index, Position pos, Predicate<AEItemKey> validator) {
+    public ItemConfigSlotWidget(
+            IConfigurableAESlotList<AEItemKey> slotList,
+            int index,
+            Position pos,
+            Predicate<AEItemKey> validator) {
         super(slotList, index, pos, validator);
     }
 
-    public ItemConfigSlotWidget(IConfigurableAESlotList<AEItemKey> slotList, int index, int x, int y, Predicate<AEItemKey> validator) {
+    public ItemConfigSlotWidget(
+            IConfigurableAESlotList<AEItemKey> slotList,
+            int index,
+            int x,
+            int y,
+            Predicate<AEItemKey> validator) {
         super(slotList, index, x, y, validator);
     }
 
     @OnlyIn(Dist.CLIENT)
     @Override
-    public void drawInBackground(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+    public void drawInBackground(
+            @NotNull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         super.drawInBackground(graphics, mouseX, mouseY, partialTicks);
         Position position = getPosition();
         GuiTextures.SLOT.draw(graphics, mouseX, mouseY, position.x, position.y, 18, 18);
@@ -63,7 +77,8 @@ public class ItemConfigSlotWidget extends ConfigSlotWidget<AEItemKey> {
         if (config != null) {
             var stack = config.toStack();
             List<Component> tips = getHoverTexts(DrawerHelper.getItemToolTip(stack));
-            gui.getModularUIGui().setHoverTooltip(tips, stack, null, stack.getTooltipImage().orElse(null));
+            gui.getModularUIGui()
+                    .setHoverTooltip(tips, stack, null, stack.getTooltipImage().orElse(null));
         } else super.drawTooltipTexts(mouseX, mouseY);
     }
 
@@ -163,8 +178,7 @@ public class ItemConfigSlotWidget extends ConfigSlotWidget<AEItemKey> {
         Rect2i rectangle = toRectangleBox();
         return Lists.newArrayList(new Target() {
 
-            @NotNull
-            @Override
+            @NotNull @Override
             public Rect2i getArea() {
                 return rectangle;
             }

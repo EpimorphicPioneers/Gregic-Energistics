@@ -1,4 +1,3 @@
 package com.epimorphismmc.gregiceng.api;
 
-public class GEValues {
-}
+public class GEValues {}

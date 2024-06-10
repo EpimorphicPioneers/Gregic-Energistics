@@ -1,19 +1,13 @@
 package com.epimorphismmc.gregiceng.common.machine.multiblock.part.appeng;
 
-import appeng.api.networking.IGridNodeListener;
-import appeng.api.networking.IStackWatcher;
-import appeng.api.networking.security.IActionSource;
-import appeng.api.networking.storage.IStorageWatcherNode;
-import appeng.api.stacks.AEItemKey;
-import appeng.api.stacks.AEKey;
-import appeng.me.ManagedGridNode;
 import com.epimorphismmc.gregiceng.api.machine.feature.multiblock.IMEStockingBus;
 import com.epimorphismmc.gregiceng.api.misc.ConfigurableAESlot;
 import com.epimorphismmc.gregiceng.api.misc.IConfigurableAESlotList;
 import com.epimorphismmc.gregiceng.api.misc.SerializableItemTransferList;
+
 import com.epimorphismmc.monomorphism.ae2.MEPartMachine;
 import com.epimorphismmc.monomorphism.machine.fancyconfigurator.InventoryFancyConfigurator;
-import com.google.common.primitives.Ints;
+
 import com.gregtechceu.gtceu.api.GTValues;
 import com.gregtechceu.gtceu.api.capability.recipe.IO;
 import com.gregtechceu.gtceu.api.capability.recipe.ItemRecipeCapability;
@@ -32,13 +26,15 @@ import com.gregtechceu.gtceu.api.machine.trait.NotifiableItemStackHandler;
 import com.gregtechceu.gtceu.api.machine.trait.NotifiableRecipeHandlerTrait;
 import com.gregtechceu.gtceu.api.recipe.GTRecipe;
 import com.gregtechceu.gtceu.common.item.IntCircuitBehaviour;
+
 import com.lowdragmc.lowdraglib.misc.ItemStackTransfer;
 import com.lowdragmc.lowdraglib.misc.ItemTransferList;
 import com.lowdragmc.lowdraglib.side.item.IItemTransfer;
 import com.lowdragmc.lowdraglib.syncdata.annotation.Persisted;
 import com.lowdragmc.lowdraglib.syncdata.field.ManagedFieldHolder;
-import lombok.Getter;
+
 import net.minecraft.ChatFormatting;
+import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -47,39 +43,59 @@ import net.minecraft.server.TickTask;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
+
+import appeng.api.networking.IGridNodeListener;
+import appeng.api.networking.IStackWatcher;
+import appeng.api.networking.security.IActionSource;
+import appeng.api.networking.storage.IStorageWatcherNode;
+import appeng.api.stacks.AEItemKey;
+import appeng.api.stacks.AEKey;
+import appeng.me.ManagedGridNode;
+import com.google.common.primitives.Ints;
+import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.annotation.ParametersAreNonnullByDefault;
+
 import static com.gregtechceu.gtceu.api.machine.trait.NotifiableItemStackHandler.handleIngredient;
 
+@ParametersAreNonnullByDefault
+@MethodsReturnNonnullByDefault
 public class StockingBusPartMachine extends MEPartMachine implements IMEStockingBus {
-    protected static final ManagedFieldHolder MANAGED_FIELD_HOLDER = new ManagedFieldHolder(StockingBusPartMachine.class, MEPartMachine.MANAGED_FIELD_HOLDER);
+    protected static final ManagedFieldHolder MANAGED_FIELD_HOLDER =
+            new ManagedFieldHolder(StockingBusPartMachine.class, MEPartMachine.MANAGED_FIELD_HOLDER);
 
     @Persisted
     protected final ExportOnlyAEItemList inventory;
+
     @Getter
     @Persisted
     protected final NotifiableItemStackHandler shareInventory;
+
     @Getter
     @Persisted
     protected final NotifiableItemStackHandler circuitInventory;
+
     @Getter
     protected final ItemHandlerProxyRecipeTrait combinedInventory;
 
-    @Nullable
-    protected TickableSubscription updateSubs;
+    @Nullable protected TickableSubscription updateSubs;
 
     public StockingBusPartMachine(IMachineBlockEntity holder, Object... args) {
         super(holder, GTValues.EV, IO.IN, args);
         this.inventory = new ExportOnlyAEItemList(this, 5 * 5);
-        this.circuitInventory = new NotifiableItemStackHandler(this, 1, IO.IN, IO.NONE).setFilter(IntCircuitBehaviour::isIntegratedCircuit);
+        this.circuitInventory = new NotifiableItemStackHandler(this, 1, IO.IN, IO.NONE)
+                .setFilter(IntCircuitBehaviour::isIntegratedCircuit);
         this.shareInventory = new NotifiableItemStackHandler(this, 9, IO.IN, IO.NONE);
-        this.combinedInventory = new ItemHandlerProxyRecipeTrait(this, Set.of(inventory, circuitInventory, shareInventory), IO.IN, IO.NONE);
+        this.combinedInventory = new ItemHandlerProxyRecipeTrait(
+                this, Set.of(inventory, circuitInventory, shareInventory), IO.IN, IO.NONE);
     }
 
     @Override
@@ -111,9 +127,7 @@ public class StockingBusPartMachine extends MEPartMachine implements IMEStocking
         }
     }
 
-    protected void update() {
-
-    }
+    protected void update() {}
 
     @Override
     public boolean isDistinct() {
@@ -133,19 +147,25 @@ public class StockingBusPartMachine extends MEPartMachine implements IMEStocking
     @Override
     public void attachConfigurators(ConfiguratorPanel configuratorPanel) {
         configuratorPanel.attachConfigurators(new IFancyConfiguratorButton.Toggle(
-            GuiTextures.BUTTON_DISTINCT_BUSES.getSubTexture(0, 0.5, 1, 0.5),
-            GuiTextures.BUTTON_DISTINCT_BUSES.getSubTexture(0, 0, 1, 0.5),
-            this::isDistinct, (clickData, pressed) -> setDistinct(pressed))
-            .setTooltipsSupplier(pressed -> List.of(
-                Component.translatable("gtceu.multiblock.universal.distinct").setStyle(Style.EMPTY.withColor(ChatFormatting.YELLOW))
-                    .append(Component.translatable(pressed ? "gtceu.multiblock.universal.distinct.yes" : "gtceu.multiblock.universal.distinct.no")))));
+                        GuiTextures.BUTTON_DISTINCT_BUSES.getSubTexture(0, 0.5, 1, 0.5),
+                        GuiTextures.BUTTON_DISTINCT_BUSES.getSubTexture(0, 0, 1, 0.5),
+                        this::isDistinct,
+                        (clickData, pressed) -> setDistinct(pressed))
+                .setTooltipsSupplier(
+                        pressed -> List.of(Component.translatable("gtceu.multiblock.universal.distinct")
+                                .setStyle(Style.EMPTY.withColor(ChatFormatting.YELLOW))
+                                .append(Component.translatable(
+                                        pressed
+                                                ? "gtceu.multiblock.universal.distinct.yes"
+                                                : "gtceu.multiblock.universal.distinct.no")))));
         configuratorPanel.attachConfigurators(new CircuitFancyConfigurator(circuitInventory.storage));
-        configuratorPanel.attachConfigurators(new InventoryFancyConfigurator(shareInventory.storage, Component.translatable("gui.gregiceng.share_inventory.title"))
-            .setTooltips(List.of(Component.translatable("gui.gregiceng.share_inventory.desc"))));
+        configuratorPanel.attachConfigurators(new InventoryFancyConfigurator(
+                        shareInventory.storage, Component.translatable("gui.gregiceng.share_inventory.title"))
+                .setTooltips(List.of(Component.translatable("gui.gregiceng.share_inventory.desc"))));
     }
 
     @Override
-    public boolean testConfiguredInOtherPart(@NotNull AEItemKey config) {
+    public boolean testConfiguredInOtherPart(@Nullable AEItemKey config) {
         if (!isFormed() || isDistinct()) return true;
 
         for (IMultiController controller : getControllers()) {
@@ -176,8 +196,10 @@ public class StockingBusPartMachine extends MEPartMachine implements IMEStocking
         return MANAGED_FIELD_HOLDER;
     }
 
-    protected class ExportOnlyAEItemList extends NotifiableRecipeHandlerTrait<Ingredient> implements IConfigurableAESlotList<AEItemKey> {
-        public static final ManagedFieldHolder MANAGED_FIELD_HOLDER = new ManagedFieldHolder(ExportOnlyAEItemList.class, NotifiableRecipeHandlerTrait.MANAGED_FIELD_HOLDER);
+    protected class ExportOnlyAEItemList extends NotifiableRecipeHandlerTrait<Ingredient>
+            implements IConfigurableAESlotList<AEItemKey> {
+        public static final ManagedFieldHolder MANAGED_FIELD_HOLDER = new ManagedFieldHolder(
+                ExportOnlyAEItemList.class, NotifiableRecipeHandlerTrait.MANAGED_FIELD_HOLDER);
 
         @Persisted
         ItemTransferList inventory;
@@ -244,38 +266,50 @@ public class StockingBusPartMachine extends MEPartMachine implements IMEStocking
         }
 
         @Override
-        public List<Ingredient> handleRecipeInner(IO io, GTRecipe recipe, List<Ingredient> left,
-                                                  @Nullable String slotName, boolean simulate) {
-            return handleIngredient(io, recipe, left, simulate, getHandlerIO(),
-                new ItemStackTransfer(NonNullList.of(ItemStack.EMPTY,
-                    Arrays.stream(inventory.transfers).map(item -> item.getStackInSlot(0)).toArray(ItemStack[]::new))) {
+        public @Nullable List<Ingredient> handleRecipeInner(
+                IO io,
+                GTRecipe recipe,
+                List<Ingredient> left,
+                @Nullable String slotName,
+                boolean simulate) {
+            return handleIngredient(
+                    io,
+                    recipe,
+                    left,
+                    simulate,
+                    getHandlerIO(),
+                    new ItemStackTransfer(NonNullList.of(
+                            ItemStack.EMPTY,
+                            Arrays.stream(inventory.transfers)
+                                    .map(item -> item.getStackInSlot(0))
+                                    .toArray(ItemStack[]::new))) {
 
-                    @NotNull
-                    @Override
-                    public ItemStack extractItem(int slot, int amount, boolean simulate, boolean notifyChanges) {
-                        ItemStack extracted = super.extractItem(slot, amount, simulate, notifyChanges);
-                        if (!extracted.isEmpty()) {
-                            inventory.transfers[slot].extractItem(0, amount, simulate, notifyChanges);
+                        @NotNull @Override
+                        public ItemStack extractItem(
+                                int slot, int amount, boolean simulate, boolean notifyChanges) {
+                            ItemStack extracted = super.extractItem(slot, amount, simulate, notifyChanges);
+                            if (!extracted.isEmpty()) {
+                                inventory.transfers[slot].extractItem(0, amount, simulate, notifyChanges);
+                            }
+                            return extracted;
                         }
-                        return extracted;
-                    }
-                });
+                    });
         }
 
         @Override
         public List<Object> getContents() {
             return Arrays.stream(inventory.transfers)
-                .map(transfer -> transfer.getStackInSlot(0))
-                .filter(stack -> !stack.isEmpty())
-                .collect(Collectors.toUnmodifiableList());
+                    .map(transfer -> transfer.getStackInSlot(0))
+                    .filter(stack -> !stack.isEmpty())
+                    .collect(Collectors.toUnmodifiableList());
         }
 
         @Override
         public double getTotalContentAmount() {
             return Arrays.stream(inventory.transfers)
-                .map(transfer -> transfer.getStackInSlot(0))
-                .mapToInt(ItemStack::getCount)
-                .sum();
+                    .map(transfer -> transfer.getStackInSlot(0))
+                    .mapToInt(ItemStack::getCount)
+                    .sum();
         }
 
         @Override
@@ -305,7 +339,7 @@ public class StockingBusPartMachine extends MEPartMachine implements IMEStocking
 
     protected class ExportOnlyAEItem extends ConfigurableAESlot<AEItemKey> implements IItemTransfer {
 
-        public ExportOnlyAEItem(AEItemKey config) {
+        public ExportOnlyAEItem(@Nullable AEItemKey config) {
             super(config);
         }
 
@@ -330,13 +364,13 @@ public class StockingBusPartMachine extends MEPartMachine implements IMEStocking
         }
 
         @Override
-        public void setStackInSlot(int slot, @NotNull ItemStack stack) {
+        public void setStackInSlot(int slot, ItemStack stack) {
             // NO-OP
         }
 
-        @NotNull
-        @Override
-        public ItemStack insertItem(int slot, @NotNull ItemStack stack, boolean simulate, boolean notifyChanges) {
+        @NotNull @Override
+        public ItemStack insertItem(
+                int slot, ItemStack stack, boolean simulate, boolean notifyChanges) {
             return stack;
         }
 
@@ -345,21 +379,19 @@ public class StockingBusPartMachine extends MEPartMachine implements IMEStocking
             return 1;
         }
 
-        @NotNull
-        @Override
+        @NotNull @Override
         public ItemStack getStackInSlot(int slot) {
             int count = Ints.saturatedCast(getAmount());
-            if (count > 0) {
+            if (config != null && count > 0) {
                 return config.toStack(count);
             }
             return ItemStack.EMPTY;
         }
 
-        @NotNull
-        @Override
+        @NotNull @Override
         public ItemStack extractItem(int slot, int amount, boolean simulate, boolean notifyChanges) {
             int extracted = Ints.saturatedCast(request(amount, simulate));
-            if (extracted > 0) {
+            if (config != null && extracted > 0) {
                 return config.toStack(extracted);
             }
             return ItemStack.EMPTY;
@@ -371,7 +403,7 @@ public class StockingBusPartMachine extends MEPartMachine implements IMEStocking
         }
 
         @Override
-        public boolean isItemValid(int slot, @NotNull ItemStack stack) {
+        public boolean isItemValid(int slot, ItemStack stack) {
             return false;
         }
 
@@ -382,10 +414,9 @@ public class StockingBusPartMachine extends MEPartMachine implements IMEStocking
             }
         }
 
-        @NotNull
-        @Override
+        @NotNull @Override
         public Object createSnapshot() {
-            return config;
+            return Objects.requireNonNullElse(config, new Object());
         }
 
         @Override

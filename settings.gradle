@@ -40,6 +40,7 @@ dependencyResolutionManagement {
         def ldLibVersion = "1.0.25.j"
         def mixinextrasVersion = "0.3.2"
         def monomorphismLibVersion = "1.1.0-build.23"
+        def spotlessVersion = "7.0.0.BETA1"
 
         forge {
             version("forgeShortVersion", forgeVersion)
@@ -102,6 +103,9 @@ dependencyResolutionManagement {
 
             def machete = version("machete", macheteVersion)
             plugin("machete", "io.github.p03w.machete").versionRef(machete)
+
+            def spotless = version("spotless", spotlessVersion)
+            plugin("spotless", "com.diffplug.spotless").versionRef(spotless)
         }
     }
 }

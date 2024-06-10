@@ -1,18 +1,13 @@
 package com.epimorphismmc.gregiceng.common.machine.multiblock.part.appeng;
 
-import appeng.api.networking.IGridNodeListener;
-import appeng.api.networking.IStackWatcher;
-import appeng.api.networking.security.IActionSource;
-import appeng.api.networking.storage.IStorageWatcherNode;
-import appeng.api.stacks.AEFluidKey;
-import appeng.api.stacks.AEKey;
-import appeng.me.ManagedGridNode;
 import com.epimorphismmc.gregiceng.api.machine.feature.multiblock.IMEStockingHatch;
 import com.epimorphismmc.gregiceng.api.misc.ConfigurableAESlot;
 import com.epimorphismmc.gregiceng.api.misc.IConfigurableAESlotList;
 import com.epimorphismmc.gregiceng.api.misc.SerializableFluidTransferList;
+
 import com.epimorphismmc.monomorphism.ae2.AEUtils;
 import com.epimorphismmc.monomorphism.ae2.MEPartMachine;
+
 import com.gregtechceu.gtceu.api.GTValues;
 import com.gregtechceu.gtceu.api.capability.recipe.FluidRecipeCapability;
 import com.gregtechceu.gtceu.api.capability.recipe.IO;
@@ -26,32 +21,47 @@ import com.gregtechceu.gtceu.api.machine.feature.multiblock.IMultiPart;
 import com.gregtechceu.gtceu.api.machine.trait.NotifiableRecipeHandlerTrait;
 import com.gregtechceu.gtceu.api.recipe.GTRecipe;
 import com.gregtechceu.gtceu.api.recipe.ingredient.FluidIngredient;
+
 import com.lowdragmc.lowdraglib.misc.FluidStorage;
 import com.lowdragmc.lowdraglib.side.fluid.FluidStack;
 import com.lowdragmc.lowdraglib.side.fluid.IFluidStorage;
 import com.lowdragmc.lowdraglib.syncdata.annotation.Persisted;
 import com.lowdragmc.lowdraglib.syncdata.field.ManagedFieldHolder;
+
+import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.TickTask;
 import net.minecraft.server.level.ServerLevel;
-import org.jetbrains.annotations.NotNull;
+
+import appeng.api.networking.IGridNodeListener;
+import appeng.api.networking.IStackWatcher;
+import appeng.api.networking.security.IActionSource;
+import appeng.api.networking.storage.IStorageWatcherNode;
+import appeng.api.stacks.AEFluidKey;
+import appeng.api.stacks.AEKey;
+import appeng.me.ManagedGridNode;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import javax.annotation.ParametersAreNonnullByDefault;
+
 import static com.gregtechceu.gtceu.api.machine.trait.NotifiableFluidTank.handleIngredient;
 
+@ParametersAreNonnullByDefault
+@MethodsReturnNonnullByDefault
 public class StockingHatchPartMachine extends MEPartMachine implements IMEStockingHatch {
-    protected static final ManagedFieldHolder MANAGED_FIELD_HOLDER = new ManagedFieldHolder(StockingHatchPartMachine.class, MEPartMachine.MANAGED_FIELD_HOLDER);
+    protected static final ManagedFieldHolder MANAGED_FIELD_HOLDER =
+            new ManagedFieldHolder(StockingHatchPartMachine.class, MEPartMachine.MANAGED_FIELD_HOLDER);
 
     @Persisted
     protected final ExportOnlyAEFluidList tanks;
 
-    @Nullable
-    protected TickableSubscription updateSubs;
+    @Nullable protected TickableSubscription updateSubs;
 
     public StockingHatchPartMachine(IMachineBlockEntity holder, Object... args) {
         super(holder, GTValues.EV, IO.IN, args);
@@ -78,7 +88,7 @@ public class StockingHatchPartMachine extends MEPartMachine implements IMEStocki
     }
 
     @Override
-    public boolean testConfiguredInOtherPart(@NotNull AEFluidKey config) {
+    public boolean testConfiguredInOtherPart(@Nullable AEFluidKey config) {
         if (!isFormed()) return true;
 
         for (IMultiController controller : getControllers()) {
@@ -103,12 +113,10 @@ public class StockingHatchPartMachine extends MEPartMachine implements IMEStocki
         }
     }
 
-    protected void update() {
-
-    }
+    protected void update() {}
 
     @Override
-    public void attachConfigurators(ConfiguratorPanel configuratorPanel) {/**/}
+    public void attachConfigurators(ConfiguratorPanel configuratorPanel) {}
 
     @Override
     public boolean isOnline() {
@@ -120,11 +128,14 @@ public class StockingHatchPartMachine extends MEPartMachine implements IMEStocki
         return MANAGED_FIELD_HOLDER;
     }
 
-    protected class ExportOnlyAEFluidList extends NotifiableRecipeHandlerTrait<FluidIngredient> implements IConfigurableAESlotList<AEFluidKey> {
-        public static final ManagedFieldHolder MANAGED_FIELD_HOLDER = new ManagedFieldHolder(ExportOnlyAEFluidList.class, NotifiableRecipeHandlerTrait.MANAGED_FIELD_HOLDER);
+    protected class ExportOnlyAEFluidList extends NotifiableRecipeHandlerTrait<FluidIngredient>
+            implements IConfigurableAESlotList<AEFluidKey> {
+        public static final ManagedFieldHolder MANAGED_FIELD_HOLDER = new ManagedFieldHolder(
+                ExportOnlyAEFluidList.class, NotifiableRecipeHandlerTrait.MANAGED_FIELD_HOLDER);
 
         @Persisted
         private final SerializableFluidTransferList tanks;
+
         private FluidStorage[] fluidStorages;
 
         private IStackWatcher storageWatcher;
@@ -192,34 +203,37 @@ public class StockingHatchPartMachine extends MEPartMachine implements IMEStocki
         public FluidStorage[] getStorages() {
             if (this.fluidStorages == null) {
                 this.fluidStorages = Arrays.stream(tanks.transfers)
-                    .map(transfer -> new WrappedFluidStorage(transfer.getTankCapacity(0), (ExportOnlyAEFluid) transfer))
-                    .toArray(FluidStorage[]::new);
-                return this.fluidStorages;
-            } else {
-                return this.fluidStorages;
+                        .map(transfer ->
+                                new WrappedFluidStorage(transfer.getTankCapacity(0), (ExportOnlyAEFluid) transfer))
+                        .toArray(FluidStorage[]::new);
             }
+            return this.fluidStorages;
         }
 
         @Override
-        public List<FluidIngredient> handleRecipeInner(IO io, GTRecipe recipe, List<FluidIngredient> left,
-                                                       @Nullable String slotName, boolean simulate) {
+        public @Nullable List<FluidIngredient> handleRecipeInner(
+                IO io,
+                GTRecipe recipe,
+                List<FluidIngredient> left,
+                @Nullable String slotName,
+                boolean simulate) {
             return handleIngredient(io, recipe, left, simulate, getHandlerIO(), getStorages());
         }
 
         @Override
         public List<Object> getContents() {
             return Arrays.stream(tanks.transfers)
-                .map(transfer -> transfer.getFluidInTank(0))
-                .filter(stack -> !stack.isEmpty())
-                .collect(Collectors.toUnmodifiableList());
+                    .map(transfer -> transfer.getFluidInTank(0))
+                    .filter(stack -> !stack.isEmpty())
+                    .collect(Collectors.toUnmodifiableList());
         }
 
         @Override
         public double getTotalContentAmount() {
             return Arrays.stream(tanks.transfers)
-                .map(transfer -> transfer.getFluidInTank(0))
-                .mapToLong(FluidStack::getAmount)
-                .sum();
+                    .map(transfer -> transfer.getFluidInTank(0))
+                    .mapToLong(FluidStack::getAmount)
+                    .sum();
         }
 
         @Override
@@ -255,18 +269,17 @@ public class StockingHatchPartMachine extends MEPartMachine implements IMEStocki
                 this.fluid = fluid;
             }
 
-            public WrappedFluidStorage(long capacity, Predicate<FluidStack> validator, ExportOnlyAEFluid fluid) {
+            public WrappedFluidStorage(
+                    long capacity, Predicate<FluidStack> validator, ExportOnlyAEFluid fluid) {
                 super(capacity, validator);
                 this.fluid = fluid;
             }
 
             @Override
-            @NotNull
             public FluidStack getFluid() {
                 return this.fluid.getFluid();
             }
 
-            @NotNull
             @Override
             public FluidStack drain(FluidStack maxDrain, boolean simulate, boolean notifyChanges) {
                 return fluid.drain(maxDrain, simulate, notifyChanges);
@@ -286,9 +299,10 @@ public class StockingHatchPartMachine extends MEPartMachine implements IMEStocki
         }
     }
 
-    protected class ExportOnlyAEFluid extends ConfigurableAESlot<AEFluidKey> implements IFluidStorage {
+    protected class ExportOnlyAEFluid extends ConfigurableAESlot<AEFluidKey>
+            implements IFluidStorage {
 
-        public ExportOnlyAEFluid(AEFluidKey config) {
+        public ExportOnlyAEFluid(@Nullable AEFluidKey config) {
             super(config);
         }
 
@@ -313,17 +327,16 @@ public class StockingHatchPartMachine extends MEPartMachine implements IMEStocki
         }
 
         @Override
-        @NotNull
         public FluidStack getFluid() {
             long amount = getAmount();
-            if (amount > 0) {
+            if (config != null && amount > 0) {
                 return AEUtils.toFluidStack(config, amount);
             }
             return FluidStack.empty();
         }
 
         @Override
-        public void setFluid(FluidStack fluid) {/**/}
+        public void setFluid(FluidStack fluid) {}
 
         @Override
         public long getFluidAmount() {
@@ -351,13 +364,12 @@ public class StockingHatchPartMachine extends MEPartMachine implements IMEStocki
             return false;
         }
 
-        @NotNull
         @Override
-        public FluidStack drain(int tank, FluidStack resource, boolean simulate, boolean notifyChanges) {
+        public FluidStack drain(
+                int tank, FluidStack resource, boolean simulate, boolean notifyChanges) {
             return this.drain(resource, simulate, notifyChanges);
         }
 
-        @NotNull
         @Override
         public FluidStack drain(FluidStack resource, boolean doDrain, boolean notifyChanges) {
             if (config != null && AEUtils.matches(config, resource)) {
@@ -367,10 +379,9 @@ public class StockingHatchPartMachine extends MEPartMachine implements IMEStocki
         }
 
         @Override
-        @NotNull
         public FluidStack drain(long maxDrain, boolean simulate, boolean notifyChanges) {
             long extracted = request(maxDrain, simulate);
-            if (extracted > 0) {
+            if (config != null && extracted > 0) {
                 return AEUtils.toFluidStack(config, extracted);
             }
             return FluidStack.empty();
@@ -393,10 +404,9 @@ public class StockingHatchPartMachine extends MEPartMachine implements IMEStocki
             }
         }
 
-        @NotNull
         @Override
         public Object createSnapshot() {
-            return config;
+            return Objects.requireNonNullElse(config, new Object());
         }
 
         @Override

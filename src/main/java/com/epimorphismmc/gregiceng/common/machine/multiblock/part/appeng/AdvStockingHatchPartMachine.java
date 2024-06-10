@@ -1,28 +1,40 @@
 package com.epimorphismmc.gregiceng.common.machine.multiblock.part.appeng;
 
-import appeng.api.stacks.AEFluidKey;
-import appeng.api.stacks.AEKey;
 import com.epimorphismmc.gregiceng.api.gui.wight.ConfigSlotWidget;
 import com.epimorphismmc.gregiceng.api.machine.feature.multiblock.IAutoPullPart;
+
 import com.gregtechceu.gtceu.api.GTValues;
 import com.gregtechceu.gtceu.api.capability.recipe.IO;
 import com.gregtechceu.gtceu.api.gui.fancy.ConfiguratorPanel;
 import com.gregtechceu.gtceu.api.machine.IMachineBlockEntity;
 import com.gregtechceu.gtceu.api.machine.feature.multiblock.IMultiController;
+
 import com.lowdragmc.lowdraglib.syncdata.annotation.Persisted;
 import com.lowdragmc.lowdraglib.syncdata.field.ManagedFieldHolder;
+
+import net.minecraft.MethodsReturnNonnullByDefault;
+
+import appeng.api.stacks.AEFluidKey;
+import appeng.api.stacks.AEKey;
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.util.function.Predicate;
 
+import javax.annotation.ParametersAreNonnullByDefault;
+
+@ParametersAreNonnullByDefault
+@MethodsReturnNonnullByDefault
 public class AdvStockingHatchPartMachine extends StockingHatchPartMachine implements IAutoPullPart {
-    protected static final ManagedFieldHolder MANAGED_FIELD_HOLDER = new ManagedFieldHolder(AdvStockingHatchPartMachine.class, StockingHatchPartMachine.MANAGED_FIELD_HOLDER);
+    protected static final ManagedFieldHolder MANAGED_FIELD_HOLDER = new ManagedFieldHolder(
+            AdvStockingHatchPartMachine.class, StockingHatchPartMachine.MANAGED_FIELD_HOLDER);
 
     @Persisted
-    @Getter @Setter
+    @Getter
+    @Setter
     private long minPullAmount;
+
     private Predicate<AEFluidKey> autoPullTest;
 
     public AdvStockingHatchPartMachine(IMachineBlockEntity holder, Object... args) {
@@ -41,7 +53,7 @@ public class AdvStockingHatchPartMachine extends StockingHatchPartMachine implem
     @Override
     public void removedFromController(IMultiController controller) {
         // block auto-pull from working when not in a formed multiblock
-        this.autoPullTest = $ -> false;
+        this.autoPullTest = key -> false;
         if (isWorkingEnabled()) {
             // may as well clear if we are auto-pull, no reason to preserve the config
             this.tanks.clearConfig();

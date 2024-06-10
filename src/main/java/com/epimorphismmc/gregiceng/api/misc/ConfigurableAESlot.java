@@ -1,30 +1,37 @@
 package com.epimorphismmc.gregiceng.api.misc;
 
+import com.lowdragmc.lowdraglib.syncdata.IContentChangeAware;
+import com.lowdragmc.lowdraglib.syncdata.ITagSerializable;
+
+import net.minecraft.nbt.CompoundTag;
+
 import appeng.api.config.Actionable;
 import appeng.api.networking.security.IActionSource;
 import appeng.api.stacks.AEKey;
 import appeng.me.ManagedGridNode;
-import com.lowdragmc.lowdraglib.syncdata.IContentChangeAware;
-import com.lowdragmc.lowdraglib.syncdata.ITagSerializable;
 import lombok.Getter;
 import lombok.Setter;
-import net.minecraft.nbt.CompoundTag;
 import org.jetbrains.annotations.Nullable;
 
-public abstract class ConfigurableAESlot<T extends AEKey> implements IConfigurableAESlot<T>, ITagSerializable<CompoundTag>, IContentChangeAware {
-    protected final static String CONFIG_TAG = "config";
-    @Getter @Setter
-    protected Runnable onContentsChanged = () -> {};
+public abstract class ConfigurableAESlot<T extends AEKey>
+        implements IConfigurableAESlot<T>, ITagSerializable<CompoundTag>, IContentChangeAware {
+    protected static final String CONFIG_TAG = "config";
+
     @Getter
-    protected T config;
+    @Setter
+    protected Runnable onContentsChanged = () -> {};
 
-    public ConfigurableAESlot() {/**/}
+    @Getter
+    @Nullable protected T config;
 
-    public ConfigurableAESlot(T config) {
+    public ConfigurableAESlot() {}
+
+    public ConfigurableAESlot(@Nullable T config) {
         this.config = config;
     }
 
     protected abstract ManagedGridNode getNode();
+
     protected abstract IActionSource getActionSource();
 
     @Override

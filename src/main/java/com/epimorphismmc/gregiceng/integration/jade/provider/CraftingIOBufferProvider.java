@@ -3,7 +3,9 @@ package com.epimorphismmc.gregiceng.integration.jade.provider;
 import com.epimorphismmc.gregiceng.GregicEng;
 import com.epimorphismmc.gregiceng.common.machine.multiblock.part.appeng.CraftingIOBufferPartMachine;
 import com.epimorphismmc.gregiceng.utils.GregicEngUtils;
+
 import com.gregtechceu.gtceu.api.blockentity.MetaMachineBlockEntity;
+
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -14,6 +16,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.registries.ForgeRegistries;
+
 import org.jetbrains.annotations.Nullable;
 import snownee.jade.api.BlockAccessor;
 import snownee.jade.api.IBlockComponentProvider;
@@ -21,13 +24,14 @@ import snownee.jade.api.IServerDataProvider;
 import snownee.jade.api.ITooltip;
 import snownee.jade.api.config.IPluginConfig;
 
-public enum CraftingIOBufferProvider implements IBlockComponentProvider, IServerDataProvider<BlockAccessor> {
+public enum CraftingIOBufferProvider
+        implements IBlockComponentProvider, IServerDataProvider<BlockAccessor> {
     INSTANCE;
 
     @Override
-    public void appendTooltip(ITooltip iTooltip, BlockAccessor blockAccessor, IPluginConfig iPluginConfig) {
+    public void appendTooltip(
+            ITooltip iTooltip, BlockAccessor blockAccessor, IPluginConfig iPluginConfig) {
         CompoundTag serverData = blockAccessor.getServerData();
-
 
         ListTag itemTags = serverData.getList("items", Tag.TAG_COMPOUND);
         ListTag fluidTags = serverData.getList("fluids", Tag.TAG_COMPOUND);
@@ -36,23 +40,26 @@ public enum CraftingIOBufferProvider implements IBlockComponentProvider, IServer
             Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemTag.getString("item")));
             long count = itemTag.getLong("count");
             if (item != null) {
-                iTooltip.add(
-                        item.getDescription().copy().withStyle(ChatFormatting.GOLD)
-                                .append(Component.literal(" * ").withStyle(ChatFormatting.WHITE))
-                                .append(Component.literal("" + count).withStyle(ChatFormatting.LIGHT_PURPLE))
-                );
+                iTooltip.add(item.getDescription()
+                        .copy()
+                        .withStyle(ChatFormatting.GOLD)
+                        .append(Component.literal(" * ").withStyle(ChatFormatting.WHITE))
+                        .append(Component.literal("" + count).withStyle(ChatFormatting.LIGHT_PURPLE)));
             }
         }
         for (int i = 0; i < fluidTags.size(); ++i) {
             CompoundTag fluidTag = fluidTags.getCompound(i);
-            @Nullable FluidType fluid = ForgeRegistries.FLUID_TYPES.get().getValue(new ResourceLocation(fluidTag.getString("fluid")));
+            @Nullable FluidType fluid = ForgeRegistries.FLUID_TYPES
+                    .get()
+                    .getValue(new ResourceLocation(fluidTag.getString("fluid")));
             long count = fluidTag.getLong("count");
             if (fluid != null) {
-                iTooltip.add(
-                        fluid.getDescription().copy().withStyle(ChatFormatting.AQUA)
-                                .append(Component.literal(" * ").withStyle(ChatFormatting.WHITE))
-                                .append(Component.literal("" + count).withStyle(ChatFormatting.LIGHT_PURPLE))
-                );
+                iTooltip.add(fluid
+                        .getDescription()
+                        .copy()
+                        .withStyle(ChatFormatting.AQUA)
+                        .append(Component.literal(" * ").withStyle(ChatFormatting.WHITE))
+                        .append(Component.literal("" + count).withStyle(ChatFormatting.LIGHT_PURPLE)));
             }
         }
     }

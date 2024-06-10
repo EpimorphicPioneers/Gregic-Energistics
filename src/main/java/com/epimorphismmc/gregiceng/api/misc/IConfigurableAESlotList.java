@@ -8,9 +8,13 @@ import java.util.Set;
 
 public interface IConfigurableAESlotList<K extends AEKey> {
     IConfigurableAESlot<K> getAESlot(int index);
+
     int getSlots();
+
     boolean hasConfig(@Nullable K key);
+
     void clearConfig();
+
     default Set<K> getAEKeySet() {
         Set<K> keys = new HashSet<>();
         for (int i = 0; i < getSlots(); i++) {

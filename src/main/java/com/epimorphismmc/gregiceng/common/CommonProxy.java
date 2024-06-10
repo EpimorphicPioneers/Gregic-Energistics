@@ -4,10 +4,13 @@ import com.epimorphismmc.gregiceng.GregicEng;
 import com.epimorphismmc.gregiceng.common.data.GECreativeModeTabs;
 import com.epimorphismmc.gregiceng.common.data.GEMachines;
 import com.epimorphismmc.gregiceng.common.item.GEDataStickBehavior;
+
 import com.epimorphismmc.monomorphism.proxy.base.ICommonProxyBase;
+
 import com.gregtechceu.gtceu.api.GTCEuAPI;
 import com.gregtechceu.gtceu.api.machine.MachineDefinition;
 import com.gregtechceu.gtceu.common.data.GTItems;
+
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 
@@ -18,19 +21,16 @@ public class CommonProxy implements ICommonProxyBase {
     }
 
     @Override
-    public void registerEventHandlers() {
-
-    }
+    public void registerEventHandlers() {}
 
     @Override
-    public void registerCapabilities() {
-
-    }
+    public void registerCapabilities() {}
 
     /* -------------------------------------------------- Registration Methods -------------------------------------------------- */
 
     @Override
-    public void registerMachineDefinitions(GTCEuAPI.RegisterEvent<ResourceLocation, MachineDefinition> event) {
+    public void registerMachineDefinitions(
+            GTCEuAPI.RegisterEvent<ResourceLocation, MachineDefinition> event) {
         GECreativeModeTabs.init();
         GEMachines.init();
     }

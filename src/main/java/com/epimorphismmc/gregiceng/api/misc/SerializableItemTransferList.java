@@ -3,6 +3,7 @@ package com.epimorphismmc.gregiceng.api.misc;
 import com.lowdragmc.lowdraglib.misc.ItemTransferList;
 import com.lowdragmc.lowdraglib.side.item.IItemTransfer;
 import com.lowdragmc.lowdraglib.syncdata.IContentChangeAware;
+
 import lombok.Getter;
 import lombok.Setter;
 

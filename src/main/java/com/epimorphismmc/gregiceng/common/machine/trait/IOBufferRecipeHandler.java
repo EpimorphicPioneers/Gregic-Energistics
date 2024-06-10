@@ -1,8 +1,7 @@
 package com.epimorphismmc.gregiceng.common.machine.trait;
 
-import appeng.api.stacks.AEFluidKey;
-import appeng.api.stacks.AEItemKey;
 import com.epimorphismmc.gregiceng.common.machine.multiblock.part.appeng.CraftingIOBufferPartMachine;
+
 import com.gregtechceu.gtceu.api.capability.recipe.FluidRecipeCapability;
 import com.gregtechceu.gtceu.api.capability.recipe.IO;
 import com.gregtechceu.gtceu.api.capability.recipe.IRecipeCapabilityHolder;
@@ -12,13 +11,18 @@ import com.gregtechceu.gtceu.api.machine.trait.IRecipeHandlerTrait;
 import com.gregtechceu.gtceu.api.machine.trait.MachineTrait;
 import com.gregtechceu.gtceu.api.recipe.GTRecipe;
 import com.gregtechceu.gtceu.api.recipe.ingredient.FluidIngredient;
+
 import com.lowdragmc.lowdraglib.side.fluid.FluidStack;
 import com.lowdragmc.lowdraglib.syncdata.ISubscription;
 import com.lowdragmc.lowdraglib.syncdata.field.ManagedFieldHolder;
-import lombok.Getter;
+
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
+
+import appeng.api.stacks.AEFluidKey;
+import appeng.api.stacks.AEItemKey;
+import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -31,16 +35,21 @@ import static com.epimorphismmc.gregiceng.utils.GregicEngUtils.copyFluidIngredie
 import static com.epimorphismmc.gregiceng.utils.GregicEngUtils.copyIngredients;
 
 public class IOBufferRecipeHandler extends MachineTrait {
-    protected static final ManagedFieldHolder MANAGED_FIELD_HOLDER = new ManagedFieldHolder(IOBufferRecipeHandler.class);
+    protected static final ManagedFieldHolder MANAGED_FIELD_HOLDER =
+            new ManagedFieldHolder(IOBufferRecipeHandler.class);
     private ResourceLocation lockedRecipeId;
     private int lockedSlot;
     protected List<Runnable> listeners = new ArrayList<>();
+
     @Getter
     protected final IRecipeHandlerTrait<Ingredient> itemInputHandler;
+
     @Getter
     protected final IRecipeHandlerTrait<FluidIngredient> fluidInputHandler;
+
     @Getter
     protected final IRecipeHandlerTrait<Ingredient> itemOutputHandler;
+
     @Getter
     protected final IRecipeHandlerTrait<FluidIngredient> fluidOutputHandler;
 
@@ -61,7 +70,8 @@ public class IOBufferRecipeHandler extends MachineTrait {
         return (CraftingIOBufferPartMachine) super.getMachine();
     }
 
-    public List<Ingredient> handleItemInner(GTRecipe recipe, List<Ingredient> left, boolean simulate) {
+    public List<Ingredient> handleItemInner(
+            GTRecipe recipe, List<Ingredient> left, boolean simulate) {
         var internalInv = getMachine().getInternalInventory();
         if (recipe.id.equals(lockedRecipeId) && lockedSlot >= 0) {
             left = internalInv[lockedSlot].handleItemInternal(left, simulate);
@@ -82,7 +92,8 @@ public class IOBufferRecipeHandler extends MachineTrait {
         return left;
     }
 
-    public List<FluidIngredient> handleFluidInner(GTRecipe recipe, List<FluidIngredient> left, boolean simulate) {
+    public List<FluidIngredient> handleFluidInner(
+            GTRecipe recipe, List<FluidIngredient> left, boolean simulate) {
         var internalInv = getMachine().getInternalInventory();
         if (recipe.id.equals(lockedRecipeId) && lockedSlot >= 0) {
             left = internalInv[lockedSlot].handleFluidInternal(left, simulate);
@@ -107,7 +118,7 @@ public class IOBufferRecipeHandler extends MachineTrait {
     public List<IRecipeHandlerTrait> getRecipeHandlers() {
         return List.of(fluidInputHandler, fluidOutputHandler, itemInputHandler, itemOutputHandler);
     }
-    
+
     @Override
     public ManagedFieldHolder getFieldHolder() {
         return MANAGED_FIELD_HOLDER;
@@ -126,29 +137,36 @@ public class IOBufferRecipeHandler extends MachineTrait {
         }
 
         @Override
-        public List<Ingredient> handleRecipeInner(IO io, GTRecipe recipe, List<Ingredient> left, @Nullable String slotName, boolean simulate) {
+        public List<Ingredient> handleRecipeInner(
+                IO io,
+                GTRecipe recipe,
+                List<Ingredient> left,
+                @Nullable String slotName,
+                boolean simulate) {
             if (io != IO.IN) return left;
             var machine = getMachine();
             machine.getCircuitInventory().handleRecipeInner(io, recipe, left, slotName, simulate);
             left = handleItemInner(recipe, left, simulate);
-            return left != null ? machine.getShareInventory().handleRecipeInner(io, recipe, left, slotName, simulate) : null;
+            return left != null
+                    ? machine.getShareInventory().handleRecipeInner(io, recipe, left, slotName, simulate)
+                    : null;
         }
 
         @Override
         public List<Object> getContents() {
             return Arrays.stream(getMachine().getInternalInventory())
-                .map(CraftingIOBufferPartMachine.InternalSlot::getItemInputs)
-                .flatMap(Arrays::stream)
-                .collect(Collectors.toList());
+                    .map(CraftingIOBufferPartMachine.InternalSlot::getItemInputs)
+                    .flatMap(Arrays::stream)
+                    .collect(Collectors.toList());
         }
 
         @Override
         public double getTotalContentAmount() {
             return Arrays.stream(getMachine().getInternalInventory())
-                .map(CraftingIOBufferPartMachine.InternalSlot::getItemInputs)
-                .flatMap(Arrays::stream)
-                .mapToLong(ItemStack::getCount)
-                .sum();
+                    .map(CraftingIOBufferPartMachine.InternalSlot::getItemInputs)
+                    .flatMap(Arrays::stream)
+                    .mapToLong(ItemStack::getCount)
+                    .sum();
         }
 
         @Override
@@ -186,27 +204,34 @@ public class IOBufferRecipeHandler extends MachineTrait {
         }
 
         @Override
-        public List<FluidIngredient> handleRecipeInner(IO io, GTRecipe recipe, List<FluidIngredient> left, @Nullable String slotName, boolean simulate) {
+        public List<FluidIngredient> handleRecipeInner(
+                IO io,
+                GTRecipe recipe,
+                List<FluidIngredient> left,
+                @Nullable String slotName,
+                boolean simulate) {
             if (io != IO.IN) return left;
             left = handleFluidInner(recipe, left, simulate);
-            return left != null ? getMachine().getShareTank().handleRecipeInner(io, recipe, left, slotName, simulate) : null;
+            return left != null
+                    ? getMachine().getShareTank().handleRecipeInner(io, recipe, left, slotName, simulate)
+                    : null;
         }
 
         @Override
         public List<Object> getContents() {
             return Arrays.stream(getMachine().getInternalInventory())
-                .map(CraftingIOBufferPartMachine.InternalSlot::getFluidInputs)
-                .flatMap(Arrays::stream)
-                .collect(Collectors.toList());
+                    .map(CraftingIOBufferPartMachine.InternalSlot::getFluidInputs)
+                    .flatMap(Arrays::stream)
+                    .collect(Collectors.toList());
         }
 
         @Override
         public double getTotalContentAmount() {
             return Arrays.stream(getMachine().getInternalInventory())
-                .map(CraftingIOBufferPartMachine.InternalSlot::getFluidInputs)
-                .flatMap(Arrays::stream)
-                .mapToLong(FluidStack::getAmount)
-                .sum();
+                    .map(CraftingIOBufferPartMachine.InternalSlot::getFluidInputs)
+                    .flatMap(Arrays::stream)
+                    .mapToLong(FluidStack::getAmount)
+                    .sum();
         }
 
         @Override
@@ -243,9 +268,13 @@ public class IOBufferRecipeHandler extends MachineTrait {
             return () -> listeners.remove(listener);
         }
 
-        @Nullable
-        @Override
-        public List<Ingredient> handleRecipeInner(IO io, GTRecipe recipe, List<Ingredient> left, @Nullable String slotName, boolean simulate) {
+        @Nullable @Override
+        public List<Ingredient> handleRecipeInner(
+                IO io,
+                GTRecipe recipe,
+                List<Ingredient> left,
+                @Nullable String slotName,
+                boolean simulate) {
             if (!getMachine().isWorkingEnabled() || io != IO.OUT) return left;
             if (!simulate) {
                 for (Ingredient ingredient : left) {
@@ -296,9 +325,13 @@ public class IOBufferRecipeHandler extends MachineTrait {
             return () -> listeners.remove(listener);
         }
 
-        @Nullable
-        @Override
-        public List<FluidIngredient> handleRecipeInner(IO io, GTRecipe recipe, List<FluidIngredient> left, @Nullable String slotName, boolean simulate) {
+        @Nullable @Override
+        public List<FluidIngredient> handleRecipeInner(
+                IO io,
+                GTRecipe recipe,
+                List<FluidIngredient> left,
+                @Nullable String slotName,
+                boolean simulate) {
             if (!getMachine().isWorkingEnabled() || io != IO.OUT) return left;
             if (!simulate) {
                 for (FluidIngredient ingredient : left) {

@@ -1,15 +1,18 @@
 package com.epimorphismmc.gregiceng.api.gui.wight;
 
-import appeng.api.stacks.AEKey;
 import com.epimorphismmc.gregiceng.api.misc.IConfigurableAESlot;
+
 import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Size;
-import lombok.Setter;
+
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+
+import appeng.api.stacks.AEKey;
+import lombok.Setter;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -18,6 +21,7 @@ import java.util.function.BiConsumer;
 public abstract class AESlotWidget<T extends AEKey> extends Widget {
     @Setter
     protected BiConsumer<AESlotWidget<T>, List<Component>> onAddedTooltips;
+
     protected IConfigurableAESlot<T> aeSlot;
     protected T key;
     protected long amount;
@@ -43,7 +47,7 @@ public abstract class AESlotWidget<T extends AEKey> extends Widget {
         super.writeInitialData(buffer);
         this.key = aeSlot.getConfig();
         this.amount = aeSlot.getAmount();
-        if (key != null && amount > 0){
+        if (key != null && amount > 0) {
             buffer.writeBoolean(true);
             key.writeToPacket(buffer);
             buffer.writeVarLong(amount);

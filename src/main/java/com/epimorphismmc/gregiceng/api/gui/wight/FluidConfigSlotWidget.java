@@ -1,21 +1,26 @@
 package com.epimorphismmc.gregiceng.api.gui.wight;
 
-import appeng.api.stacks.AEFluidKey;
 import com.epimorphismmc.gregiceng.api.misc.IConfigurableAESlotList;
+
 import com.epimorphismmc.monomorphism.ae2.AEUtils;
-import com.google.common.collect.Lists;
+
 import com.gregtechceu.gtceu.api.gui.GuiTextures;
+
 import com.lowdragmc.lowdraglib.gui.ingredient.Target;
 import com.lowdragmc.lowdraglib.gui.util.DrawerHelper;
 import com.lowdragmc.lowdraglib.side.fluid.FluidStack;
 import com.lowdragmc.lowdraglib.side.fluid.FluidTransferHelper;
 import com.lowdragmc.lowdraglib.utils.Position;
+
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+
+import appeng.api.stacks.AEFluidKey;
+import com.google.common.collect.Lists;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
@@ -27,17 +32,27 @@ import static com.gregtechceu.gtceu.utils.GTUtil.getFluidFromContainer;
 public class FluidConfigSlotWidget extends ConfigSlotWidget<AEFluidKey> {
     public static final int LOAD_PHANTOM_FLUID_STACK_FROM_NBT = 13;
 
-    public FluidConfigSlotWidget(IConfigurableAESlotList<AEFluidKey> slotList, int index, Position pos, Predicate<AEFluidKey> validator) {
+    public FluidConfigSlotWidget(
+            IConfigurableAESlotList<AEFluidKey> slotList,
+            int index,
+            Position pos,
+            Predicate<AEFluidKey> validator) {
         super(slotList, index, pos, validator);
     }
 
-    public FluidConfigSlotWidget(IConfigurableAESlotList<AEFluidKey> slotList, int index, int x, int y, Predicate<AEFluidKey> validator) {
+    public FluidConfigSlotWidget(
+            IConfigurableAESlotList<AEFluidKey> slotList,
+            int index,
+            int x,
+            int y,
+            Predicate<AEFluidKey> validator) {
         super(slotList, index, x, y, validator);
     }
 
     @OnlyIn(Dist.CLIENT)
     @Override
-    public void drawInBackground(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+    public void drawInBackground(
+            @NotNull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         super.drawInBackground(graphics, mouseX, mouseY, partialTicks);
         Position position = getPosition();
         GuiTextures.FLUID_SLOT.draw(graphics, mouseX, mouseY, position.x, position.y, 18, 18);
@@ -51,7 +66,8 @@ public class FluidConfigSlotWidget extends ConfigSlotWidget<AEFluidKey> {
         int stackY = position.y + 1;
         var config = getConfig();
         if (config != null) {
-            DrawerHelper.drawFluidForGui(graphics, AEUtils.toFluidStack(config, 1), 1, stackX, stackY, 16, 16);
+            DrawerHelper.drawFluidForGui(
+                    graphics, AEUtils.toFluidStack(config, 1), 1, stackX, stackY, 16, 16);
         }
 
         if (isMouseOverElement(mouseX, mouseY) && getHoverElement(mouseX, mouseY) == this) {
@@ -164,8 +180,7 @@ public class FluidConfigSlotWidget extends ConfigSlotWidget<AEFluidKey> {
         Rect2i rectangle = toRectangleBox();
         return Lists.newArrayList(new Target() {
 
-            @NotNull
-            @Override
+            @NotNull @Override
             public Rect2i getArea() {
                 return rectangle;
             }

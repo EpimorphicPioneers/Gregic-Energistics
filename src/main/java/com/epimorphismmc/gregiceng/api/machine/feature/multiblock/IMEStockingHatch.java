@@ -1,10 +1,11 @@
 package com.epimorphismmc.gregiceng.api.machine.feature.multiblock;
 
-import appeng.api.stacks.AEFluidKey;
 import com.epimorphismmc.gregiceng.api.gui.wight.AESlotWidget;
 import com.epimorphismmc.gregiceng.api.gui.wight.ConfigSlotWidget;
 import com.epimorphismmc.gregiceng.api.gui.wight.FluidAESlotWidget;
 import com.epimorphismmc.gregiceng.api.gui.wight.FluidConfigSlotWidget;
+
+import appeng.api.stacks.AEFluidKey;
 
 public interface IMEStockingHatch extends IMEStockingPart<AEFluidKey> {
     @Override
