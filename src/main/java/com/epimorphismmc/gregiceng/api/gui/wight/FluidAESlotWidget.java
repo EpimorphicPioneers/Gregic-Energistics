@@ -5,6 +5,8 @@ import com.epimorphismmc.gregiceng.api.misc.IConfigurableAESlot;
 import com.epimorphismmc.monomorphism.ae2.AEUtils;
 import com.epimorphismmc.monomorphism.client.utils.ClientUtils;
 
+import appeng.api.stacks.AEFluidKey;
+
 import com.gregtechceu.gtceu.api.gui.GuiTextures;
 
 import com.lowdragmc.lowdraglib.gui.util.DrawerHelper;
@@ -21,7 +23,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
-import appeng.api.stacks.AEFluidKey;
 import com.mojang.blaze3d.systems.RenderSystem;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

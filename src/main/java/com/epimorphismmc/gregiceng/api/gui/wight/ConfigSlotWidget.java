@@ -2,6 +2,8 @@ package com.epimorphismmc.gregiceng.api.gui.wight;
 
 import com.epimorphismmc.gregiceng.api.misc.IConfigurableAESlotList;
 
+import appeng.api.stacks.AEKey;
+
 import com.lowdragmc.lowdraglib.gui.ingredient.IGhostIngredientTarget;
 import com.lowdragmc.lowdraglib.gui.ingredient.Target;
 import com.lowdragmc.lowdraglib.gui.widget.Widget;
@@ -14,7 +16,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
-import appeng.api.stacks.AEKey;
 import com.mojang.blaze3d.systems.RenderSystem;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

@@ -8,6 +8,14 @@ import com.epimorphismmc.gregiceng.api.misc.SerializableItemTransferList;
 import com.epimorphismmc.monomorphism.ae2.MEPartMachine;
 import com.epimorphismmc.monomorphism.machine.fancyconfigurator.InventoryFancyConfigurator;
 
+import appeng.api.networking.IGridNodeListener;
+import appeng.api.networking.IStackWatcher;
+import appeng.api.networking.security.IActionSource;
+import appeng.api.networking.storage.IStorageWatcherNode;
+import appeng.api.stacks.AEItemKey;
+import appeng.api.stacks.AEKey;
+import appeng.me.ManagedGridNode;
+
 import com.gregtechceu.gtceu.api.GTValues;
 import com.gregtechceu.gtceu.api.capability.recipe.IO;
 import com.gregtechceu.gtceu.api.capability.recipe.ItemRecipeCapability;
@@ -44,13 +52,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 
-import appeng.api.networking.IGridNodeListener;
-import appeng.api.networking.IStackWatcher;
-import appeng.api.networking.security.IActionSource;
-import appeng.api.networking.storage.IStorageWatcherNode;
-import appeng.api.stacks.AEItemKey;
-import appeng.api.stacks.AEKey;
-import appeng.me.ManagedGridNode;
 import com.google.common.primitives.Ints;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;

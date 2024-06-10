@@ -12,11 +12,7 @@ public class GECovers {
             (def, coverable, side) -> new PumpCover(def, coverable, side, GTValues.MAX),
             PumpCoverRenderer.INSTANCE);
 
-    private GECovers() {
-        /**/
-    }
+    private GECovers() {}
 
-    public static void init() {
-        /**/
-    }
+    public static void init() {}
 }

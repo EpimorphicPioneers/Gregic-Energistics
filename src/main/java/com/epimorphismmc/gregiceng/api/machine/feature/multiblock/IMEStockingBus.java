@@ -5,9 +5,9 @@ import com.epimorphismmc.gregiceng.api.gui.wight.ConfigSlotWidget;
 import com.epimorphismmc.gregiceng.api.gui.wight.ItemAESlotWidget;
 import com.epimorphismmc.gregiceng.api.gui.wight.ItemConfigSlotWidget;
 
-import com.gregtechceu.gtceu.api.machine.feature.multiblock.IDistinctPart;
-
 import appeng.api.stacks.AEItemKey;
+
+import com.gregtechceu.gtceu.api.machine.feature.multiblock.IDistinctPart;
 
 public interface IMEStockingBus extends IMEStockingPart<AEItemKey>, IDistinctPart {
 

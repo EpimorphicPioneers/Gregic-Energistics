@@ -2,6 +2,8 @@ package com.epimorphismmc.gregiceng.api.gui.wight;
 
 import com.epimorphismmc.gregiceng.api.misc.IConfigurableAESlot;
 
+import appeng.api.stacks.AEKey;
+
 import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Size;
@@ -11,7 +13,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
-import appeng.api.stacks.AEKey;
 import lombok.Setter;
 import org.jetbrains.annotations.Nullable;
 

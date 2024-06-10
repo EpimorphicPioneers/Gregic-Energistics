@@ -4,6 +4,8 @@ import com.epimorphismmc.gregiceng.api.misc.IConfigurableAESlotList;
 
 import com.epimorphismmc.monomorphism.ae2.AEUtils;
 
+import appeng.api.stacks.AEFluidKey;
+
 import com.gregtechceu.gtceu.api.gui.GuiTextures;
 
 import com.lowdragmc.lowdraglib.gui.ingredient.Target;
@@ -19,7 +21,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
-import appeng.api.stacks.AEFluidKey;
 import com.google.common.collect.Lists;
 import org.jetbrains.annotations.NotNull;
 

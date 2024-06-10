@@ -20,11 +20,7 @@ public class GECreativeModeTabs {
                     .build())
             .register();
 
-    private GECreativeModeTabs() {
-        /**/
-    }
+    private GECreativeModeTabs() {}
 
-    public static void init() {
-        /**/
-    }
+    public static void init() {}
 }

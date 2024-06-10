@@ -3,6 +3,9 @@ package com.epimorphismmc.gregiceng.common.machine.multiblock.part.appeng;
 import com.epimorphismmc.gregiceng.api.gui.wight.ConfigSlotWidget;
 import com.epimorphismmc.gregiceng.api.machine.feature.multiblock.IAutoPullPart;
 
+import appeng.api.stacks.AEFluidKey;
+import appeng.api.stacks.AEKey;
+
 import com.gregtechceu.gtceu.api.GTValues;
 import com.gregtechceu.gtceu.api.capability.recipe.IO;
 import com.gregtechceu.gtceu.api.gui.fancy.ConfiguratorPanel;
@@ -14,8 +17,6 @@ import com.lowdragmc.lowdraglib.syncdata.field.ManagedFieldHolder;
 
 import net.minecraft.MethodsReturnNonnullByDefault;
 
-import appeng.api.stacks.AEFluidKey;
-import appeng.api.stacks.AEKey;
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import lombok.Getter;
 import lombok.Setter;

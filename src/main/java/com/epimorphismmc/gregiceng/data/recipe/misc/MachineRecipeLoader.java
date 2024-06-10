@@ -3,15 +3,15 @@ package com.epimorphismmc.gregiceng.data.recipe.misc;
 import com.epimorphismmc.gregiceng.common.data.GEMachines;
 import com.epimorphismmc.gregiceng.data.recipe.GECraftingComponents;
 
+import appeng.core.definitions.AEBlocks;
+import appeng.core.definitions.AEItems;
+
 import com.gregtechceu.gtceu.api.GTValues;
 import com.gregtechceu.gtceu.common.data.GTMaterials;
 import com.gregtechceu.gtceu.data.recipe.CustomTags;
 import com.gregtechceu.gtceu.data.recipe.VanillaRecipeHelper;
 
 import net.minecraft.data.recipes.FinishedRecipe;
-
-import appeng.core.definitions.AEBlocks;
-import appeng.core.definitions.AEItems;
 
 import java.util.function.Consumer;
 

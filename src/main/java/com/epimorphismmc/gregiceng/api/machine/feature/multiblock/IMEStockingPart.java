@@ -5,6 +5,8 @@ import com.epimorphismmc.gregiceng.api.gui.wight.AESlotWidget;
 import com.epimorphismmc.gregiceng.api.gui.wight.ConfigSlotWidget;
 import com.epimorphismmc.gregiceng.api.misc.IConfigurableAESlotList;
 
+import appeng.api.stacks.AEKey;
+
 import com.gregtechceu.gtceu.api.gui.GuiTextures;
 import com.gregtechceu.gtceu.api.machine.feature.IFancyUIMachine;
 
@@ -13,7 +15,6 @@ import com.lowdragmc.lowdraglib.gui.widget.LabelWidget;
 import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 
-import appeng.api.stacks.AEKey;
 import org.jetbrains.annotations.Nullable;
 
 public interface IMEStockingPart<T extends AEKey> extends IFancyUIMachine {

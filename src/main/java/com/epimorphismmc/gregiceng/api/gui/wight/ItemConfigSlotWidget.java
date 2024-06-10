@@ -2,6 +2,8 @@ package com.epimorphismmc.gregiceng.api.gui.wight;
 
 import com.epimorphismmc.gregiceng.api.misc.IConfigurableAESlotList;
 
+import appeng.api.stacks.AEItemKey;
+
 import com.gregtechceu.gtceu.api.gui.GuiTextures;
 
 import com.lowdragmc.lowdraglib.gui.ingredient.Target;
@@ -16,7 +18,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
-import appeng.api.stacks.AEItemKey;
 import com.google.common.collect.Lists;
 import org.jetbrains.annotations.NotNull;
 
