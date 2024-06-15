@@ -2,14 +2,15 @@ package com.epimorphismmc.gregiceng.api.misc;
 
 import com.lowdragmc.lowdraglib.misc.ItemStackTransfer;
 import com.lowdragmc.lowdraglib.side.item.ItemTransferHelper;
+
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.item.ItemStack;
+
 import org.jetbrains.annotations.NotNull;
 
 public class UnlimitedItemStackTransfer extends ItemStackTransfer {
 
-    public UnlimitedItemStackTransfer() {
-    }
+    public UnlimitedItemStackTransfer() {}
 
     public UnlimitedItemStackTransfer(int size) {
         super(size);
@@ -24,17 +25,14 @@ public class UnlimitedItemStackTransfer extends ItemStackTransfer {
     }
 
     @Override
-    @NotNull
-    public ItemStack extractItem(int slot, int amount, boolean simulate, boolean notifyChanges) {
-        if (amount == 0)
-            return ItemStack.EMPTY;
+    @NotNull public ItemStack extractItem(int slot, int amount, boolean simulate, boolean notifyChanges) {
+        if (amount == 0) return ItemStack.EMPTY;
 
         validateSlotIndex(slot);
 
         ItemStack existing = this.stacks.get(slot);
 
-        if (existing.isEmpty())
-            return ItemStack.EMPTY;
+        if (existing.isEmpty()) return ItemStack.EMPTY;
 
         if (existing.getCount() <= amount) {
             if (!simulate) {
@@ -48,7 +46,8 @@ public class UnlimitedItemStackTransfer extends ItemStackTransfer {
             }
         } else {
             if (!simulate) {
-                this.stacks.set(slot, ItemTransferHelper.copyStackWithSize(existing, existing.getCount() - amount));
+                this.stacks.set(
+                        slot, ItemTransferHelper.copyStackWithSize(existing, existing.getCount() - amount));
                 if (notifyChanges) {
                     onContentsChanged(slot);
                 }
