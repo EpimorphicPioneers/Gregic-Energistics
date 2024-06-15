@@ -9,6 +9,10 @@ public interface IConfigurableAESlot<T extends AEKey> {
 
     void setConfig(@Nullable T what);
 
+    default boolean hasConfig() {
+        return getConfig() != null;
+    }
+
     default long getAmount() {
         return request(Long.MAX_VALUE, true);
     }

@@ -3,7 +3,6 @@ package com.epimorphismmc.gregiceng.common.machine.multiblock.part.appeng;
 import com.epimorphismmc.gregiceng.api.machine.feature.multiblock.IMEStockingBus;
 import com.epimorphismmc.gregiceng.api.misc.ConfigurableAESlot;
 import com.epimorphismmc.gregiceng.api.misc.IConfigurableAESlotList;
-import com.epimorphismmc.gregiceng.api.misc.SerializableItemTransferList;
 
 import com.epimorphismmc.monomorphism.ae2.MEPartMachine;
 import com.epimorphismmc.monomorphism.machine.fancyconfigurator.InventoryFancyConfigurator;
@@ -34,14 +33,11 @@ import com.gregtechceu.gtceu.api.recipe.GTRecipe;
 import com.gregtechceu.gtceu.common.item.IntCircuitBehaviour;
 
 import com.lowdragmc.lowdraglib.misc.ItemStackTransfer;
-import com.lowdragmc.lowdraglib.misc.ItemTransferList;
-import com.lowdragmc.lowdraglib.side.item.IItemTransfer;
 import com.lowdragmc.lowdraglib.syncdata.annotation.Persisted;
 import com.lowdragmc.lowdraglib.syncdata.field.ManagedFieldHolder;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.MethodsReturnNonnullByDefault;
-import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
@@ -52,12 +48,10 @@ import net.minecraft.world.item.crafting.Ingredient;
 
 import com.google.common.primitives.Ints;
 import lombok.Getter;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -186,32 +180,42 @@ public class StockingBusPartMachine extends MEPartMachine implements IMEStocking
                 ExportOnlyAEItemList.class, NotifiableRecipeHandlerTrait.MANAGED_FIELD_HOLDER);
 
         @Persisted
-        ItemTransferList inventory;
+        ExportOnlyAEItem[] inventory;
+
+        private ItemStackTransfer itemTransfer;
 
         private IStackWatcher storageWatcher;
-        private final IStorageWatcherNode stackWatcherNode = new IStorageWatcherNode() {
-            @Override
-            public void updateWatcher(IStackWatcher newWatcher) {
-                storageWatcher = newWatcher;
-                configureWatchers();
-            }
-
-            @Override
-            public void onStackChange(AEKey what, long amount) {
-                notifyListeners();
-            }
-        };
 
         public ExportOnlyAEItemList(MetaMachine holder, int slots) {
             super(holder);
-            var transfers = new ExportOnlyAEItem[slots];
+            this.inventory = new ExportOnlyAEItem[slots];
             for (int i = 0; i < slots; i++) {
-                transfers[i] = new ExportOnlyAEItem(null);
-                transfers[i].setOnContentsChanged(this::onChanged);
+                inventory[i] = new ExportOnlyAEItem(null);
+                inventory[i].setOnContentsChanged(this::onChanged);
             }
-            this.inventory = new SerializableItemTransferList(transfers);
 
+            IStorageWatcherNode stackWatcherNode = new IStorageWatcherNode() {
+                @Override
+                public void updateWatcher(IStackWatcher newWatcher) {
+                    storageWatcher = newWatcher;
+                    configureWatchers();
+                }
+
+                @Override
+                public void onStackChange(AEKey what, long amount) {
+                    notifyListeners();
+                }
+            };
             getMainNode().addService(IStorageWatcherNode.class, stackWatcherNode);
+        }
+
+        private void configureWatchers() {
+            if (storageWatcher != null) {
+                storageWatcher.reset();
+                for (AEItemKey aeItemKey : getAEKeySet()) {
+                    storageWatcher.add(aeItemKey);
+                }
+            }
         }
 
         @Override
@@ -223,12 +227,12 @@ public class StockingBusPartMachine extends MEPartMachine implements IMEStocking
 
         @Override
         public ExportOnlyAEItem getAESlot(int index) {
-            return (ExportOnlyAEItem) inventory.transfers[index];
+            return inventory[index];
         }
 
         @Override
         public int getSlots() {
-            return inventory.getSlots();
+            return inventory.length;
         }
 
         @Override
@@ -249,6 +253,13 @@ public class StockingBusPartMachine extends MEPartMachine implements IMEStocking
             }
         }
 
+        public ItemStackTransfer getTransfer() {
+            if (this.itemTransfer == null) {
+                this.itemTransfer = new WrappedItemStackTransfer(inventory);
+            }
+            return itemTransfer;
+        }
+
         @Override
         public @Nullable List<Ingredient> handleRecipeInner(
                 IO io,
@@ -256,44 +267,20 @@ public class StockingBusPartMachine extends MEPartMachine implements IMEStocking
                 List<Ingredient> left,
                 @Nullable String slotName,
                 boolean simulate) {
-            return handleIngredient(
-                    io,
-                    recipe,
-                    left,
-                    simulate,
-                    getHandlerIO(),
-                    new ItemStackTransfer(NonNullList.of(
-                            ItemStack.EMPTY,
-                            Arrays.stream(inventory.transfers)
-                                    .map(item -> item.getStackInSlot(0))
-                                    .toArray(ItemStack[]::new))) {
-
-                        @NotNull @Override
-                        public ItemStack extractItem(
-                                int slot, int amount, boolean simulate, boolean notifyChanges) {
-                            ItemStack extracted = super.extractItem(slot, amount, simulate, notifyChanges);
-                            if (!extracted.isEmpty()) {
-                                inventory.transfers[slot].extractItem(0, amount, simulate, notifyChanges);
-                            }
-                            return extracted;
-                        }
-                    });
+            return handleIngredient(io, recipe, left, simulate, getHandlerIO(), getTransfer());
         }
 
         @Override
         public List<Object> getContents() {
-            return Arrays.stream(inventory.transfers)
-                    .map(transfer -> transfer.getStackInSlot(0))
+            return Arrays.stream(inventory)
+                    .map(ExportOnlyAEItem::getStack)
                     .filter(stack -> !stack.isEmpty())
                     .collect(Collectors.toUnmodifiableList());
         }
 
         @Override
         public double getTotalContentAmount() {
-            return Arrays.stream(inventory.transfers)
-                    .map(transfer -> transfer.getStackInSlot(0))
-                    .mapToInt(ItemStack::getCount)
-                    .sum();
+            return Arrays.stream(inventory).mapToInt(ExportOnlyAEItem::getCount).sum();
         }
 
         @Override
@@ -311,17 +298,68 @@ public class StockingBusPartMachine extends MEPartMachine implements IMEStocking
             return MANAGED_FIELD_HOLDER;
         }
 
-        private void configureWatchers() {
-            if (storageWatcher != null) {
-                storageWatcher.reset();
-                for (AEItemKey aeItemKey : getAEKeySet()) {
-                    storageWatcher.add(aeItemKey);
-                }
+        private static class WrappedItemStackTransfer extends ItemStackTransfer {
+
+            private final boolean isCopy;
+
+            private final ExportOnlyAEItem[] inventory;
+
+            public WrappedItemStackTransfer(ExportOnlyAEItem[] inventory) {
+                this(inventory, false);
+            }
+
+            public WrappedItemStackTransfer(ExportOnlyAEItem[] inventory, boolean isCopy) {
+                super();
+                this.inventory = inventory;
+                this.isCopy = isCopy;
+            }
+
+            @Override
+            public int getSlots() {
+                return inventory.length;
+            }
+
+            @Override
+            public ItemStack getStackInSlot(int slot) {
+                return inventory[slot].getStack();
+            }
+
+            @Override
+            public void setStackInSlot(int slot, ItemStack stack) {
+                // NO-OP
+            }
+
+            @Override
+            public ItemStack insertItem(
+                    int slot, ItemStack stack, boolean simulate, boolean notifyChanges) {
+                return stack;
+            }
+
+            @Override
+            public ItemStack extractItem(int slot, int amount, boolean simulate, boolean notifyChanges) {
+                if (amount == 0) return ItemStack.EMPTY;
+                validateSlotIndex(slot);
+                return inventory[slot].extract(amount, isCopy || simulate);
+            }
+
+            @Override
+            public int getSlotLimit(int slot) {
+                return Integer.MAX_VALUE;
+            }
+
+            @Override
+            public boolean isItemValid(int slot, ItemStack stack) {
+                return false;
+            }
+
+            @Override
+            public ItemStackTransfer copy() {
+                return new WrappedItemStackTransfer(inventory, true);
             }
         }
     }
 
-    protected class ExportOnlyAEItem extends ConfigurableAESlot<AEItemKey> implements IItemTransfer {
+    protected class ExportOnlyAEItem extends ConfigurableAESlot<AEItemKey> {
 
         public ExportOnlyAEItem(@Nullable AEItemKey config) {
             super(config);
@@ -347,33 +385,7 @@ public class StockingBusPartMachine extends MEPartMachine implements IMEStocking
             this.onContentsChanged();
         }
 
-        @Override
-        public void setStackInSlot(int slot, ItemStack stack) {
-            // NO-OP
-        }
-
-        @NotNull @Override
-        public ItemStack insertItem(
-                int slot, ItemStack stack, boolean simulate, boolean notifyChanges) {
-            return stack;
-        }
-
-        @Override
-        public int getSlots() {
-            return 1;
-        }
-
-        @NotNull @Override
-        public ItemStack getStackInSlot(int slot) {
-            int count = Ints.saturatedCast(getAmount());
-            if (config != null && count > 0) {
-                return config.toStack(count);
-            }
-            return ItemStack.EMPTY;
-        }
-
-        @NotNull @Override
-        public ItemStack extractItem(int slot, int amount, boolean simulate, boolean notifyChanges) {
+        public ItemStack extract(int amount, boolean simulate) {
             int extracted = Ints.saturatedCast(request(amount, simulate));
             if (config != null && extracted > 0) {
                 return config.toStack(extracted);
@@ -381,32 +393,21 @@ public class StockingBusPartMachine extends MEPartMachine implements IMEStocking
             return ItemStack.EMPTY;
         }
 
-        @Override
-        public int getSlotLimit(int slot) {
-            return Integer.MAX_VALUE;
+        public ItemStack getStack() {
+            int count = Ints.saturatedCast(getAmount());
+            if (config != null && count > 0) {
+                return config.toStack(count);
+            }
+            return ItemStack.EMPTY;
         }
 
-        @Override
-        public boolean isItemValid(int slot, ItemStack stack) {
-            return false;
+        public int getCount() {
+            return Ints.saturatedCast(getAmount());
         }
 
-        @Override
         public void onContentsChanged() {
             if (onContentsChanged != null) {
                 onContentsChanged.run();
-            }
-        }
-
-        @NotNull @Override
-        public Object createSnapshot() {
-            return Objects.requireNonNullElse(config, new Object());
-        }
-
-        @Override
-        public void restoreFromSnapshot(Object snapshot) {
-            if (snapshot instanceof AEItemKey key) {
-                this.config = key;
             }
         }
 

@@ -3,7 +3,6 @@ package com.epimorphismmc.gregiceng.common.machine.multiblock.part.appeng;
 import com.epimorphismmc.gregiceng.api.machine.feature.multiblock.IMEStockingHatch;
 import com.epimorphismmc.gregiceng.api.misc.ConfigurableAESlot;
 import com.epimorphismmc.gregiceng.api.misc.IConfigurableAESlotList;
-import com.epimorphismmc.gregiceng.api.misc.SerializableFluidTransferList;
 
 import com.epimorphismmc.monomorphism.ae2.AEUtils;
 import com.epimorphismmc.monomorphism.ae2.MEPartMachine;
@@ -30,7 +29,6 @@ import com.gregtechceu.gtceu.api.recipe.ingredient.FluidIngredient;
 
 import com.lowdragmc.lowdraglib.misc.FluidStorage;
 import com.lowdragmc.lowdraglib.side.fluid.FluidStack;
-import com.lowdragmc.lowdraglib.side.fluid.IFluidStorage;
 import com.lowdragmc.lowdraglib.syncdata.annotation.Persisted;
 import com.lowdragmc.lowdraglib.syncdata.field.ManagedFieldHolder;
 
@@ -43,8 +41,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -118,35 +114,42 @@ public class StockingHatchPartMachine extends MEPartMachine implements IMEStocki
                 ExportOnlyAEFluidList.class, NotifiableRecipeHandlerTrait.MANAGED_FIELD_HOLDER);
 
         @Persisted
-        private final SerializableFluidTransferList tanks;
+        private final ExportOnlyAEFluid[] tanks;
 
         private FluidStorage[] fluidStorages;
 
         private IStackWatcher storageWatcher;
-        private final IStorageWatcherNode stackWatcherNode = new IStorageWatcherNode() {
-            @Override
-            public void updateWatcher(IStackWatcher newWatcher) {
-                storageWatcher = newWatcher;
-                configureWatchers();
-            }
-
-            @Override
-            public void onStackChange(AEKey what, long amount) {
-                notifyListeners();
-            }
-        };
 
         public ExportOnlyAEFluidList(MetaMachine machine, int slots) {
             super(machine);
-            var storages = new ExportOnlyAEFluid[slots];
+            this.tanks = new ExportOnlyAEFluid[slots];
             for (int i = 0; i < slots; i++) {
-                storages[i] = new ExportOnlyAEFluid(null);
-                storages[i].setOnContentsChanged(this::onChanged);
+                tanks[i] = new ExportOnlyAEFluid(null);
+                tanks[i].setOnContentsChanged(this::onChanged);
             }
-            this.tanks = new SerializableFluidTransferList(storages);
-            this.fluidStorages = null;
 
+            IStorageWatcherNode stackWatcherNode = new IStorageWatcherNode() {
+                @Override
+                public void updateWatcher(IStackWatcher newWatcher) {
+                    storageWatcher = newWatcher;
+                    configureWatchers();
+                }
+
+                @Override
+                public void onStackChange(AEKey what, long amount) {
+                    notifyListeners();
+                }
+            };
             getMainNode().addService(IStorageWatcherNode.class, stackWatcherNode);
+        }
+
+        private void configureWatchers() {
+            if (storageWatcher != null) {
+                storageWatcher.reset();
+                for (AEFluidKey aeItemKey : getAEKeySet()) {
+                    storageWatcher.add(aeItemKey);
+                }
+            }
         }
 
         @Override
@@ -158,12 +161,12 @@ public class StockingHatchPartMachine extends MEPartMachine implements IMEStocki
 
         @Override
         public ExportOnlyAEFluid getAESlot(int index) {
-            return (ExportOnlyAEFluid) tanks.transfers[index];
+            return tanks[index];
         }
 
         @Override
         public int getSlots() {
-            return tanks.getTanks();
+            return tanks.length;
         }
 
         @Override
@@ -186,10 +189,8 @@ public class StockingHatchPartMachine extends MEPartMachine implements IMEStocki
 
         public FluidStorage[] getStorages() {
             if (this.fluidStorages == null) {
-                this.fluidStorages = Arrays.stream(tanks.transfers)
-                        .map(transfer ->
-                                new WrappedFluidStorage(transfer.getTankCapacity(0), (ExportOnlyAEFluid) transfer))
-                        .toArray(FluidStorage[]::new);
+                this.fluidStorages =
+                        Arrays.stream(tanks).map(WrappedFluidStorage::new).toArray(FluidStorage[]::new);
             }
             return this.fluidStorages;
         }
@@ -206,18 +207,15 @@ public class StockingHatchPartMachine extends MEPartMachine implements IMEStocki
 
         @Override
         public List<Object> getContents() {
-            return Arrays.stream(tanks.transfers)
-                    .map(transfer -> transfer.getFluidInTank(0))
+            return Arrays.stream(tanks)
+                    .map(ExportOnlyAEFluid::getStack)
                     .filter(stack -> !stack.isEmpty())
                     .collect(Collectors.toUnmodifiableList());
         }
 
         @Override
         public double getTotalContentAmount() {
-            return Arrays.stream(tanks.transfers)
-                    .map(transfer -> transfer.getFluidInTank(0))
-                    .mapToLong(FluidStack::getAmount)
-                    .sum();
+            return Arrays.stream(tanks).mapToLong(ExportOnlyAEFluid::getAmount).sum();
         }
 
         @Override
@@ -235,56 +233,97 @@ public class StockingHatchPartMachine extends MEPartMachine implements IMEStocki
             return MANAGED_FIELD_HOLDER;
         }
 
-        private void configureWatchers() {
-            if (storageWatcher != null) {
-                storageWatcher.reset();
-                for (AEFluidKey aeItemKey : getAEKeySet()) {
-                    storageWatcher.add(aeItemKey);
-                }
-            }
-        }
-
         private static class WrappedFluidStorage extends FluidStorage {
+
+            private final boolean isCopy;
 
             private final ExportOnlyAEFluid fluid;
 
-            public WrappedFluidStorage(long capacity, ExportOnlyAEFluid fluid) {
-                super(capacity);
-                this.fluid = fluid;
+            public WrappedFluidStorage(ExportOnlyAEFluid fluid) {
+                this(fluid, false);
             }
 
-            public WrappedFluidStorage(
-                    long capacity, Predicate<FluidStack> validator, ExportOnlyAEFluid fluid) {
-                super(capacity, validator);
+            public WrappedFluidStorage(ExportOnlyAEFluid fluid, boolean isCopy) {
+                super(0L);
                 this.fluid = fluid;
+                this.isCopy = isCopy;
             }
 
             @Override
             public FluidStack getFluid() {
-                return this.fluid.getFluid();
+                return this.fluid.getStack();
             }
 
             @Override
-            public FluidStack drain(FluidStack maxDrain, boolean simulate, boolean notifyChanges) {
-                return fluid.drain(maxDrain, simulate, notifyChanges);
+            public void setFluid(FluidStack fluid) {}
+
+            @Override
+            public long getFluidAmount() {
+                return fluid.getAmount();
             }
 
             @Override
-            public long fill(int tank, FluidStack resource, boolean simulate, boolean notifyChange) {
-                return fluid.fill(tank, resource, simulate, notifyChange);
+            public long getCapacity() {
+                // Its capacity is always 0.
+                return 0;
+            }
+
+            @Override
+            public long fill(FluidStack resource, boolean simulate, boolean notifyChanges) {
+                return 0;
+            }
+
+            @Override
+            public long fill(int tank, FluidStack resource, boolean simulate, boolean notifyChanges) {
+                return 0;
+            }
+
+            @Override
+            public boolean supportsFill(int tank) {
+                return false;
+            }
+
+            @Override
+            public FluidStack drain(
+                    int tank, FluidStack resource, boolean simulate, boolean notifyChange) {
+                if (tank == 0) {
+                    return drain(resource, simulate, notifyChange);
+                }
+                return FluidStack.empty();
+            }
+
+            @Override
+            public FluidStack drain(FluidStack resource, boolean doDrain, boolean notifyChanges) {
+                var config = fluid.getConfig();
+                if (!resource.isEmpty() && config != null && AEUtils.matches(config, resource)) {
+                    return this.drain(resource.getAmount(), doDrain, notifyChanges);
+                }
+                return FluidStack.empty();
+            }
+
+            @Override
+            public FluidStack drain(long maxDrain, boolean simulate, boolean notifyChanges) {
+                return fluid.drain(maxDrain, isCopy || simulate);
+            }
+
+            @Override
+            public boolean supportsDrain(int tank) {
+                return tank == 0;
+            }
+
+            @Override
+            public boolean isFluidValid(FluidStack stack) {
+                return false;
             }
 
             @Override
             public FluidStorage copy() {
-                var storage = new WrappedFluidStorage(capacity, validator, this.fluid);
-                storage.setFluid(super.fluid.copy());
-                return storage;
+                return new WrappedFluidStorage(fluid, true);
             }
         }
     }
 
-    protected class ExportOnlyAEFluid extends ConfigurableAESlot<AEFluidKey>
-            implements IFluidStorage {
+    protected class ExportOnlyAEFluid extends ConfigurableAESlot<AEFluidKey> {
 
         public ExportOnlyAEFluid(@Nullable AEFluidKey config) {
             super(config);
@@ -310,60 +349,7 @@ public class StockingHatchPartMachine extends MEPartMachine implements IMEStocki
             this.onContentsChanged();
         }
 
-        @Override
-        public FluidStack getFluid() {
-            long amount = getAmount();
-            if (config != null && amount > 0) {
-                return AEUtils.toFluidStack(config, amount);
-            }
-            return FluidStack.empty();
-        }
-
-        @Override
-        public void setFluid(FluidStack fluid) {}
-
-        @Override
-        public long getFluidAmount() {
-            return getAmount();
-        }
-
-        @Override
-        public long getCapacity() {
-            // Its capacity is always 0.
-            return 0;
-        }
-
-        @Override
-        public long fill(FluidStack resource, boolean doFill) {
-            return 0;
-        }
-
-        @Override
-        public long fill(int tank, FluidStack resource, boolean simulate, boolean notifyChanges) {
-            return 0;
-        }
-
-        @Override
-        public boolean supportsFill(int tank) {
-            return false;
-        }
-
-        @Override
-        public FluidStack drain(
-                int tank, FluidStack resource, boolean simulate, boolean notifyChanges) {
-            return this.drain(resource, simulate, notifyChanges);
-        }
-
-        @Override
-        public FluidStack drain(FluidStack resource, boolean doDrain, boolean notifyChanges) {
-            if (config != null && AEUtils.matches(config, resource)) {
-                return this.drain(resource.getAmount(), doDrain, notifyChanges);
-            }
-            return FluidStack.empty();
-        }
-
-        @Override
-        public FluidStack drain(long maxDrain, boolean simulate, boolean notifyChanges) {
+        public FluidStack drain(long maxDrain, boolean simulate) {
             long extracted = request(maxDrain, simulate);
             if (config != null && extracted > 0) {
                 return AEUtils.toFluidStack(config, extracted);
@@ -371,32 +357,17 @@ public class StockingHatchPartMachine extends MEPartMachine implements IMEStocki
             return FluidStack.empty();
         }
 
-        @Override
-        public boolean supportsDrain(int tank) {
-            return tank == 0;
+        public FluidStack getStack() {
+            long amount = getAmount();
+            if (config != null && amount > 0) {
+                return AEUtils.toFluidStack(config, amount);
+            }
+            return FluidStack.empty();
         }
 
-        @Override
-        public boolean isFluidValid(FluidStack stack) {
-            return false;
-        }
-
-        @Override
         public void onContentsChanged() {
             if (onContentsChanged != null) {
                 onContentsChanged.run();
-            }
-        }
-
-        @Override
-        public Object createSnapshot() {
-            return Objects.requireNonNullElse(config, new Object());
-        }
-
-        @Override
-        public void restoreFromSnapshot(Object snapshot) {
-            if (snapshot instanceof AEFluidKey key) {
-                this.config = key;
             }
         }
 
