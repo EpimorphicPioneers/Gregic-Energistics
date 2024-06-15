@@ -4,6 +4,7 @@ import com.epimorphismmc.gregiceng.api.machine.feature.multiblock.IMEStockingBus
 import com.epimorphismmc.gregiceng.api.misc.ConfigurableAESlot;
 import com.epimorphismmc.gregiceng.api.misc.IConfigurableAESlotList;
 
+import com.epimorphismmc.gregiceng.api.misc.UnlimitedItemStackTransfer;
 import com.epimorphismmc.monomorphism.ae2.MEPartMachine;
 import com.epimorphismmc.monomorphism.machine.fancyconfigurator.InventoryFancyConfigurator;
 
@@ -300,18 +301,11 @@ public class StockingBusPartMachine extends MEPartMachine implements IMEStocking
 
         private static class WrappedItemStackTransfer extends ItemStackTransfer {
 
-            private final boolean isCopy;
-
             private final ExportOnlyAEItem[] inventory;
 
             public WrappedItemStackTransfer(ExportOnlyAEItem[] inventory) {
-                this(inventory, false);
-            }
-
-            public WrappedItemStackTransfer(ExportOnlyAEItem[] inventory, boolean isCopy) {
                 super();
                 this.inventory = inventory;
-                this.isCopy = isCopy;
             }
 
             @Override
@@ -339,7 +333,7 @@ public class StockingBusPartMachine extends MEPartMachine implements IMEStocking
             public ItemStack extractItem(int slot, int amount, boolean simulate, boolean notifyChanges) {
                 if (amount == 0) return ItemStack.EMPTY;
                 validateSlotIndex(slot);
-                return inventory[slot].extract(amount, isCopy || simulate);
+                return inventory[slot].extract(amount, simulate);
             }
 
             @Override
@@ -354,7 +348,11 @@ public class StockingBusPartMachine extends MEPartMachine implements IMEStocking
 
             @Override
             public ItemStackTransfer copy() {
-                return new WrappedItemStackTransfer(inventory, true);
+                var copy = new UnlimitedItemStackTransfer(getSlots());
+                for (int i = 0; i < inventory.length; i++) {
+                    copy.setStackInSlot(i, getStackInSlot(i));
+                }
+                return copy;
             }
         }
     }

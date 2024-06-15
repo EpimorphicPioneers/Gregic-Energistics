@@ -235,18 +235,11 @@ public class StockingHatchPartMachine extends MEPartMachine implements IMEStocki
 
         private static class WrappedFluidStorage extends FluidStorage {
 
-            private final boolean isCopy;
-
             private final ExportOnlyAEFluid fluid;
 
             public WrappedFluidStorage(ExportOnlyAEFluid fluid) {
-                this(fluid, false);
-            }
-
-            public WrappedFluidStorage(ExportOnlyAEFluid fluid, boolean isCopy) {
                 super(0L);
                 this.fluid = fluid;
-                this.isCopy = isCopy;
             }
 
             @Override
@@ -303,7 +296,7 @@ public class StockingHatchPartMachine extends MEPartMachine implements IMEStocki
 
             @Override
             public FluidStack drain(long maxDrain, boolean simulate, boolean notifyChanges) {
-                return fluid.drain(maxDrain, isCopy || simulate);
+                return fluid.drain(maxDrain, simulate);
             }
 
             @Override
@@ -318,7 +311,7 @@ public class StockingHatchPartMachine extends MEPartMachine implements IMEStocki
 
             @Override
             public FluidStorage copy() {
-                return new WrappedFluidStorage(fluid, true);
+                return new FluidStorage(getFluid());
             }
         }
     }
