@@ -5,10 +5,11 @@ import com.epimorphismmc.gregiceng.api.gui.GEGuiTextures;
 import com.epimorphismmc.monomorphism.machine.fancyconfigurator.LongInputFancyConfigurator;
 
 import com.gregtechceu.gtceu.api.capability.IControllable;
-import com.gregtechceu.gtceu.api.gui.GuiTextures;
 import com.gregtechceu.gtceu.api.gui.fancy.ConfiguratorPanel;
 import com.gregtechceu.gtceu.api.gui.fancy.IFancyConfiguratorButton;
 import com.gregtechceu.gtceu.api.machine.feature.multiblock.IMultiPart;
+
+import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
 
 import net.minecraft.network.chat.Component;
 
@@ -19,6 +20,8 @@ public interface IAutoPullPart extends IControllable, IMultiPart {
     long getMinPullAmount();
 
     void setMinPullAmount(long minPullAmount);
+
+    IGuiTexture getConfiguratorOverlay();
 
     @Override
     default void attachConfigurators(ConfiguratorPanel configuratorPanel) {
@@ -33,7 +36,7 @@ public interface IAutoPullPart extends IControllable, IMultiPart {
                                 : "gui.gregiceng.auto_pull_me.desc.disabled"))));
         configuratorPanel.attachConfigurators(new LongInputFancyConfigurator(
                 "gui.gregiceng.min_pull_amount",
-                GuiTextures.SLOT,
+                getConfiguratorOverlay(),
                 this::getMinPullAmount,
                 this::setMinPullAmount));
     }

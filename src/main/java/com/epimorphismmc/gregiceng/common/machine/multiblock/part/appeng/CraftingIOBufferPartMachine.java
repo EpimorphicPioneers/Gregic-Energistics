@@ -122,7 +122,7 @@ public class CraftingIOBufferPartMachine extends MEPartMachine
 
     @Getter
     @Persisted
-    @DescSynced
+    @DescSynced // TODO Why do we need it?
     private final ItemStackTransfer patternInventory = new ItemStackTransfer(MAX_PATTERN_COUNT);
 
     @Getter
@@ -152,7 +152,8 @@ public class CraftingIOBufferPartMachine extends MEPartMachine
     private boolean needPatternSync;
 
     @Getter
-    protected Object2LongOpenHashMap<AEKey> returnBuffer = new Object2LongOpenHashMap<>();
+    protected Object2LongOpenHashMap<AEKey> returnBuffer =
+            new Object2LongOpenHashMap<>(); // FIXME NPE
 
     protected final IOBufferRecipeHandler recipeHandler = new IOBufferRecipeHandler(this);
 
@@ -222,7 +223,7 @@ public class CraftingIOBufferPartMachine extends MEPartMachine
                 if (inserted >= amount) {
                     returnBuffer.removeLong(key);
                 } else {
-                    returnBuffer.put(key, amount - inserted);
+                    entry.setValue(amount - inserted);
                 }
             }
         }

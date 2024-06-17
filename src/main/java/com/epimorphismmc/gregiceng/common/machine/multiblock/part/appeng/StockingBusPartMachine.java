@@ -337,6 +337,13 @@ public class StockingBusPartMachine extends MEPartMachine implements IMEStocking
             }
 
             @Override
+            protected void validateSlotIndex(int slot) {
+                if (slot < 0 || slot >= getSlots())
+                    throw new RuntimeException(
+                            "Slot " + slot + " not in valid range - [0," + getSlots() + ")");
+            }
+
+            @Override
             public int getSlotLimit(int slot) {
                 return Integer.MAX_VALUE;
             }

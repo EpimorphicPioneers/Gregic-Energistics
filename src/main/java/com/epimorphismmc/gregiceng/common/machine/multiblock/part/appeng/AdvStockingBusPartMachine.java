@@ -1,5 +1,6 @@
 package com.epimorphismmc.gregiceng.common.machine.multiblock.part.appeng;
 
+import com.epimorphismmc.gregiceng.api.gui.GEGuiTextures;
 import com.epimorphismmc.gregiceng.api.gui.wight.ConfigSlotWidget;
 import com.epimorphismmc.gregiceng.api.machine.feature.multiblock.IAutoPullPart;
 
@@ -14,6 +15,7 @@ import com.gregtechceu.gtceu.api.machine.IMachineBlockEntity;
 import com.gregtechceu.gtceu.api.machine.TickableSubscription;
 import com.gregtechceu.gtceu.api.machine.feature.multiblock.IMultiController;
 
+import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
 import com.lowdragmc.lowdraglib.syncdata.annotation.Persisted;
 import com.lowdragmc.lowdraglib.syncdata.field.ManagedFieldHolder;
 
@@ -122,6 +124,11 @@ public class AdvStockingBusPartMachine extends StockingBusPartMachine implements
     //////////////////////////////////////
     // **********     GUI     ***********//
     //////////////////////////////////////
+
+    @Override
+    public IGuiTexture getConfiguratorOverlay() {
+        return GEGuiTextures.OVERLAY_MIN_ITEM_CONFIGURATOR;
+    }
 
     @Override
     public void attachConfigurators(ConfiguratorPanel configuratorPanel) {

@@ -6,6 +6,12 @@ import com.lowdragmc.lowdraglib.gui.texture.ResourceBorderTexture;
 import com.lowdragmc.lowdraglib.gui.texture.ResourceTexture;
 
 public class GEGuiTextures {
+
+    public static final ResourceTexture OVERLAY_MIN_FLUID_CONFIGURATOR =
+            createTexture("overlay/min_fluid_configurator.png");
+    public static final ResourceTexture OVERLAY_MIN_ITEM_CONFIGURATOR =
+            createTexture("overlay/min_item_configurator.png");
+
     public static final ResourceTexture SMALL_ARROW_OVERLAY =
             createTexture("overlay/small_arrow_overlay.png");
 
