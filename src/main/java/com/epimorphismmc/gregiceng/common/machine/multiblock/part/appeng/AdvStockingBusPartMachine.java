@@ -1,0 +1,148 @@
+package com.epimorphismmc.gregiceng.common.machine.multiblock.part.appeng;
+
+import com.epimorphismmc.gregiceng.api.gui.GEGuiTextures;
+import com.epimorphismmc.gregiceng.api.gui.wight.ConfigSlotWidget;
+import com.epimorphismmc.gregiceng.api.machine.feature.multiblock.IAutoPullPart;
+
+import appeng.api.networking.IGridNodeListener;
+import appeng.api.stacks.AEItemKey;
+import appeng.api.stacks.AEKey;
+
+import com.gregtechceu.gtceu.api.GTValues;
+import com.gregtechceu.gtceu.api.capability.recipe.IO;
+import com.gregtechceu.gtceu.api.gui.fancy.ConfiguratorPanel;
+import com.gregtechceu.gtceu.api.machine.IMachineBlockEntity;
+import com.gregtechceu.gtceu.api.machine.TickableSubscription;
+import com.gregtechceu.gtceu.api.machine.feature.multiblock.IMultiController;
+
+import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
+import com.lowdragmc.lowdraglib.syncdata.annotation.Persisted;
+import com.lowdragmc.lowdraglib.syncdata.field.ManagedFieldHolder;
+
+import net.minecraft.MethodsReturnNonnullByDefault;
+
+import it.unimi.dsi.fastutil.objects.Object2LongMap;
+import lombok.Getter;
+import lombok.Setter;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.function.Predicate;
+
+import javax.annotation.ParametersAreNonnullByDefault;
+
+@ParametersAreNonnullByDefault
+@MethodsReturnNonnullByDefault
+public class AdvStockingBusPartMachine extends StockingBusPartMachine implements IAutoPullPart {
+    protected static final ManagedFieldHolder MANAGED_FIELD_HOLDER = new ManagedFieldHolder(
+            AdvStockingBusPartMachine.class, StockingBusPartMachine.MANAGED_FIELD_HOLDER);
+
+    @Persisted
+    @Getter
+    @Setter
+    private long minPullAmount;
+
+    private Predicate<AEItemKey> autoPullTest;
+
+    @Nullable protected TickableSubscription updateSubs;
+
+    public AdvStockingBusPartMachine(IMachineBlockEntity holder, Object... args) {
+        super(holder, GTValues.IV, IO.IN, args);
+        this.setWorkingEnabled(false);
+    }
+
+    @Override
+    public void addedToController(IMultiController controller) {
+        super.addedToController(controller);
+        // ensure that no other stocking bus on this multiblock is configured to hold the same item.
+        // that we have in our own bus.
+        this.autoPullTest = key -> !this.testConfiguredInOtherPart(key);
+    }
+
+    @Override
+    public void removedFromController(IMultiController controller) {
+        // block auto-pull from working when not in a formed multiblock
+        this.autoPullTest = key -> false;
+        if (isWorkingEnabled()) {
+            // may as well clear if we are auto-pull, no reason to preserve the config
+            this.inventory.clearConfig();
+        }
+        super.removedFromController(controller);
+    }
+
+    @Override
+    public void setWorkingEnabled(boolean workingEnabled) {
+        super.setWorkingEnabled(workingEnabled);
+        if (!isRemote()) {
+            if (!isWorkingEnabled()) {
+                this.inventory.clearConfig();
+            } else if (updateMEStatus()) {
+                this.refreshList();
+            }
+        }
+    }
+
+    @Override
+    public void onMainNodeStateChanged(IGridNodeListener.State reason) {
+        super.onMainNodeStateChanged(reason);
+        this.updateSubscription();
+    }
+
+    protected void updateSubscription() {
+        if (getMainNode().isOnline()) {
+            updateSubs = subscribeServerTick(updateSubs, this::update);
+        } else if (updateSubs != null) {
+            updateSubs.unsubscribe();
+            updateSubs = null;
+        }
+    }
+
+    protected void update() {
+        if (!isRemote() && isWorkingEnabled() && getOffsetTimer() % 100 == 0) {
+            refreshList();
+        }
+    }
+
+    private void refreshList() {
+        this.inventory.clearConfig();
+        var counter = getMainNode().getGrid().getStorageService().getInventory().getAvailableStacks();
+        int index = 0;
+        for (Object2LongMap.Entry<AEKey> entry : counter) {
+            if (index >= CONFIG_SIZE) break;
+            AEKey what = entry.getKey();
+            long amount = entry.getLongValue();
+
+            if (amount < minPullAmount) continue;
+            if (!(what instanceof AEItemKey itemKey)) continue;
+            if (autoPullTest != null && autoPullTest.test(itemKey)) continue;
+
+            var slot = this.inventory.getAESlot(index);
+            slot.setConfig(itemKey);
+            index++;
+        }
+    }
+
+    //////////////////////////////////////
+    // **********     GUI     ***********//
+    //////////////////////////////////////
+
+    @Override
+    public IGuiTexture getConfiguratorOverlay() {
+        return GEGuiTextures.OVERLAY_MIN_ITEM_CONFIGURATOR;
+    }
+
+    @Override
+    public void attachConfigurators(ConfiguratorPanel configuratorPanel) {
+        IAutoPullPart.super.attachConfigurators(configuratorPanel);
+        super.attachConfigurators(configuratorPanel);
+    }
+
+    @Override
+    public ConfigSlotWidget<AEItemKey> createConfigSlot(int index, int x, int y) {
+        return super.createConfigSlot(index, x, y).setIsBlocked(this::isWorkingEnabled);
+    }
+
+    @Override
+    public ManagedFieldHolder getFieldHolder() {
+        return MANAGED_FIELD_HOLDER;
+    }
+}

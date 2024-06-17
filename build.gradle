@@ -5,6 +5,7 @@ plugins {
     alias libs.plugins.architectury.loom
     alias libs.plugins.machete // automatic jar compressing on build
     alias libs.plugins.shadow
+    alias libs.plugins.spotless
 }
 
 apply plugin: "dev.architectury.loom"
@@ -36,6 +37,7 @@ apply from: "$rootDir/gradle/scripts/dependencies.gradle"
 apply from: "$rootDir/gradle/scripts/resources.gradle"
 apply from: "$rootDir/gradle/scripts/jars.gradle"
 apply from: "$rootDir/gradle/scripts/publishing.gradle"
+apply from: "$rootDir/gradle/scripts/spotless.gradle"
 
 tasks.withType(JavaCompile) {
     options.encoding = "UTF-8"

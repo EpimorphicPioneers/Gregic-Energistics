@@ -14,6 +14,7 @@ import com.gregtechceu.gtceu.api.machine.trait.NotifiableFluidTank;
 import com.gregtechceu.gtceu.api.machine.trait.NotifiableItemStackHandler;
 import com.gregtechceu.gtceu.common.item.IntCircuitBehaviour;
 import com.gregtechceu.gtceu.config.ConfigHolder;
+
 import com.lowdragmc.lowdraglib.gui.widget.SlotWidget;
 import com.lowdragmc.lowdraglib.gui.widget.TankWidget;
 import com.lowdragmc.lowdraglib.gui.widget.Widget;
@@ -25,7 +26,7 @@ import com.lowdragmc.lowdraglib.side.item.ItemTransferHelper;
 import com.lowdragmc.lowdraglib.syncdata.ISubscription;
 import com.lowdragmc.lowdraglib.syncdata.annotation.Persisted;
 import com.lowdragmc.lowdraglib.syncdata.field.ManagedFieldHolder;
-import lombok.Getter;
+
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -34,36 +35,43 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
+
+import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.List;
 import java.util.Set;
 
+import javax.annotation.ParametersAreNonnullByDefault;
+
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public class BufferPartMachine extends TieredIOPartMachine implements IDistinctPart, IMachineModifyDrops {
-
-    protected static final ManagedFieldHolder MANAGED_FIELD_HOLDER = new ManagedFieldHolder(BufferPartMachine.class, TieredIOPartMachine.MANAGED_FIELD_HOLDER);
+public class BufferPartMachine extends TieredIOPartMachine
+        implements IDistinctPart, IMachineModifyDrops {
 
     public static final long INITIAL_TANK_CAPACITY = 4 * FluidHelper.getBucket();
+    protected static final ManagedFieldHolder MANAGED_FIELD_HOLDER =
+            new ManagedFieldHolder(BufferPartMachine.class, TieredIOPartMachine.MANAGED_FIELD_HOLDER);
+
+    @Persisted
+    public final NotifiableFluidTank tank;
+
+    @Getter
+    @Persisted
+    protected final NotifiableItemStackHandler circuitInventory;
+
+    @Getter
+    protected final ItemHandlerProxyRecipeTrait combinedInventory;
 
     @Getter
     @Persisted
     private final NotifiableItemStackHandler inventory;
-    @Persisted
-    public final NotifiableFluidTank tank;
-    @Getter
-    @Persisted
-    protected final NotifiableItemStackHandler circuitInventory;
-    @Getter
-    protected final ItemHandlerProxyRecipeTrait combinedInventory;
-    @Nullable
-    protected TickableSubscription autoIOSubs;
-    @Nullable
-    protected ISubscription tankSubs;
-    @Nullable
-    protected ISubscription inventorySubs;
+
+    @Nullable protected TickableSubscription autoIOSubs;
+
+    @Nullable protected ISubscription tankSubs;
+
+    @Nullable protected ISubscription inventorySubs;
 
     private boolean hasFluidTransfer;
     private boolean hasItemTransfer;
@@ -77,16 +85,16 @@ public class BufferPartMachine extends TieredIOPartMachine implements IDistinctP
     }
 
     //////////////////////////////////////
-    //*****     Initialization    ******//
+    // *****     Initialization    ******//
     //////////////////////////////////////
+
+    public static long getTankCapacity(long initialCapacity, int tier) {
+        return initialCapacity * (1L << Math.min(9, tier));
+    }
 
     protected int getInventorySize() {
         int sizeRoot = 1 + Math.min(9, getTier());
         return sizeRoot * sizeRoot;
-    }
-
-    public static long getTankCapacity(long initialCapacity, int tier) {
-        return initialCapacity * (1L << Math.min(9, tier));
     }
 
     protected NotifiableItemStackHandler createInventory(Object... args) {
@@ -95,7 +103,8 @@ public class BufferPartMachine extends TieredIOPartMachine implements IDistinctP
 
     protected NotifiableItemStackHandler createCircuitItemHandler(Object... args) {
         if (args.length > 0 && args[0] instanceof IO io && io == IO.IN) {
-            return new NotifiableItemStackHandler(this, 1, IO.IN, IO.NONE).setFilter(IntCircuitBehaviour::isIntegratedCircuit);
+            return new NotifiableItemStackHandler(this, 1, IO.IN, IO.NONE)
+                    .setFilter(IntCircuitBehaviour::isIntegratedCircuit);
         } else {
             return new NotifiableItemStackHandler(this, 0, IO.NONE);
         }
@@ -103,9 +112,11 @@ public class BufferPartMachine extends TieredIOPartMachine implements IDistinctP
 
     protected ItemHandlerProxyRecipeTrait createCombinedItemHandler(Object... args) {
         if (args.length > 0 && args[0] instanceof IO io && io == IO.IN) {
-            return new ItemHandlerProxyRecipeTrait(this, Set.of(getInventory(), circuitInventory), IO.IN, IO.NONE);
+            return new ItemHandlerProxyRecipeTrait(
+                    this, Set.of(getInventory(), circuitInventory), IO.IN, IO.NONE);
         } else {
-            return new ItemHandlerProxyRecipeTrait(this, Set.of(getInventory(), circuitInventory), IO.NONE, IO.NONE);
+            return new ItemHandlerProxyRecipeTrait(
+                    this, Set.of(getInventory(), circuitInventory), IO.NONE, IO.NONE);
         }
     }
 
@@ -140,7 +151,7 @@ public class BufferPartMachine extends TieredIOPartMachine implements IDistinctP
     }
 
     //////////////////////////////////////
-    //********     Auto IO     *********//
+    // ********     Auto IO     *********//
     //////////////////////////////////////
 
     @Override
@@ -157,8 +168,12 @@ public class BufferPartMachine extends TieredIOPartMachine implements IDistinctP
 
     protected void updateBufferSubscription() {
         boolean canOutput = io == IO.OUT && (!tank.isEmpty() || !inventory.isEmpty());
-        this.hasItemTransfer = ItemTransferHelper.getItemTransfer(getLevel(), getPos().relative(getFrontFacing()), getFrontFacing().getOpposite()) != null;
-        this.hasFluidTransfer = FluidTransferHelper.getFluidTransfer(getLevel(), getPos().relative(getFrontFacing()), getFrontFacing().getOpposite()) != null;
+        this.hasItemTransfer = ItemTransferHelper.getItemTransfer(
+                        getLevel(), getPos().relative(getFrontFacing()), getFrontFacing().getOpposite())
+                != null;
+        this.hasFluidTransfer = FluidTransferHelper.getFluidTransfer(
+                        getLevel(), getPos().relative(getFrontFacing()), getFrontFacing().getOpposite())
+                != null;
         if (isWorkingEnabled() && (canOutput || io == IO.IN) && (hasItemTransfer || hasFluidTransfer)) {
             autoIOSubs = subscribeServerTick(autoIOSubs, this::autoIO);
         } else if (autoIOSubs != null) {
@@ -177,7 +192,7 @@ public class BufferPartMachine extends TieredIOPartMachine implements IDistinctP
                     if (hasFluidTransfer) {
                         tank.exportToNearby(getFrontFacing());
                     }
-                } else if (io == IO.IN){
+                } else if (io == IO.IN) {
                     if (hasItemTransfer) {
                         getInventory().importFromNearby(getFrontFacing());
                     }
@@ -197,7 +212,7 @@ public class BufferPartMachine extends TieredIOPartMachine implements IDistinctP
     }
 
     //////////////////////////////////////
-    //**********     GUI     ***********//
+    // **********     GUI     ***********//
     //////////////////////////////////////
 
     @Override
@@ -218,15 +233,17 @@ public class BufferPartMachine extends TieredIOPartMachine implements IDistinctP
         int index = 0;
         for (int y = 0; y < tanks; y++) {
             for (int x = 0; x < tanks; x++) {
-                container.addWidget(new SlotWidget(getInventory().storage, index++, 4 + x * 18, 4 + y * 18, true, io.support(IO.IN))
-                        .setBackgroundTexture(GuiTextures.SLOT).setIngredientIO(this.io == IO.IN ? IngredientIO.INPUT : IngredientIO.OUTPUT));
+                container.addWidget(new SlotWidget(
+                                getInventory().storage, index++, 4 + x * 18, 4 + y * 18, true, io.support(IO.IN))
+                        .setBackgroundTexture(GuiTextures.SLOT)
+                        .setIngredientIO(this.io == IO.IN ? IngredientIO.INPUT : IngredientIO.OUTPUT));
             }
         }
 
         index = 0;
         for (int y = 0; y < tanks; y++) {
-            container.addWidget(new TankWidget(tank.getStorages()[index++], 4 + tanks * 18, 4 + y * 18,
-                    true, io.support(IO.IN))
+            container.addWidget(new TankWidget(
+                            tank.getStorages()[index++], 4 + tanks * 18, 4 + y * 18, true, io.support(IO.IN))
                     .setBackground(GuiTextures.FLUID_SLOT));
         }
 
