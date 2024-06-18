@@ -254,7 +254,7 @@ public class BufferPartMachine extends TieredIOPartMachine
 
     @Override
     public boolean isDistinct() {
-        return getInventory().isDistinct() && circuitInventory.isDistinct();
+        return getInventory().isDistinct() && circuitInventory.isDistinct() && tank.isDistinct();
     }
 
     @Override
@@ -262,6 +262,7 @@ public class BufferPartMachine extends TieredIOPartMachine
         getInventory().setDistinct(isDistinct);
         circuitInventory.setDistinct(isDistinct);
         combinedInventory.setDistinct(isDistinct);
+        tank.setDistinct(isDistinct);
     }
 
     @Override
