@@ -3,10 +3,10 @@ package com.epimorphismmc.gregiceng.common.machine.multiblock.part.appeng;
 import com.epimorphismmc.gregiceng.api.machine.feature.multiblock.IMEStockingBus;
 import com.epimorphismmc.gregiceng.api.misc.ConfigurableAESlot;
 import com.epimorphismmc.gregiceng.api.misc.IConfigurableAESlotList;
-import com.epimorphismmc.gregiceng.api.misc.UnlimitedItemStackTransfer;
 
 import com.epimorphismmc.monomorphism.ae2.MEPartMachine;
 import com.epimorphismmc.monomorphism.machine.fancyconfigurator.InventoryFancyConfigurator;
+import com.epimorphismmc.monomorphism.transfer.item.BigItemStackTransfer;
 
 import appeng.api.networking.IStackWatcher;
 import appeng.api.networking.security.IActionSource;
@@ -355,7 +355,7 @@ public class StockingBusPartMachine extends MEPartMachine implements IMEStocking
 
             @Override
             public ItemStackTransfer copy() {
-                var copy = new UnlimitedItemStackTransfer(getSlots());
+                var copy = new BigItemStackTransfer(getSlots(), true, Integer.MAX_VALUE);
                 for (int i = 0; i < inventory.length; i++) {
                     copy.setStackInSlot(i, getStackInSlot(i));
                 }

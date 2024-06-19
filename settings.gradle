@@ -39,7 +39,7 @@ dependencyResolutionManagement {
         def configurationVersion = "2.2.0"
         def ldLibVersion = "1.0.25.p"
         def mixinextrasVersion = "0.3.2"
-        def monomorphismLibVersion = "1.1.1-build.24"
+        def monomorphismLibVersion = "1.1.1-build.25"
         def spotlessVersion = "7.0.0.BETA1"
 
         forge {
