@@ -75,21 +75,21 @@ public class IOBufferRecipeHandler extends MachineTrait {
             GTRecipe recipe, List<Ingredient> left, boolean simulate) {
         var internalInv = getMachine().getInternalInventory();
         if (recipe.id.equals(lockedRecipeId) && lockedSlot >= 0) {
-            left = internalInv[lockedSlot].handleItemInternal(left, simulate);
-        } else {
-            this.lockedRecipeId = recipe.id;
-            List<Ingredient> contents = copyIngredients(left);
-            for (int i = 0; i < internalInv.length; i++) {
-                if (internalInv[i].isItemEmpty()) continue;
-                contents = internalInv[i].handleItemInternal(contents, simulate);
-                if (contents == null) {
-                    this.lockedSlot = i;
-                    return contents;
-                }
-                contents = copyIngredients(left);
-            }
-            this.lockedSlot = -1;
+            return internalInv[lockedSlot].handleItemInternal(left, simulate);
         }
+
+        this.lockedRecipeId = recipe.id;
+        List<Ingredient> contents = left;
+        for (int i = 0; i < internalInv.length; i++) {
+            if (internalInv[i].isItemEmpty()) continue;
+            contents = internalInv[i].handleItemInternal(contents, simulate);
+            if (contents == null) {
+                this.lockedSlot = i;
+                return contents;
+            }
+            contents = copyIngredients(left);
+        }
+        this.lockedSlot = -1;
         return left;
     }
 
@@ -97,21 +97,22 @@ public class IOBufferRecipeHandler extends MachineTrait {
             GTRecipe recipe, List<FluidIngredient> left, boolean simulate) {
         var internalInv = getMachine().getInternalInventory();
         if (recipe.id.equals(lockedRecipeId) && lockedSlot >= 0) {
-            left = internalInv[lockedSlot].handleFluidInternal(left, simulate);
-        } else {
-            this.lockedRecipeId = recipe.id;
-            List<FluidIngredient> contents = copyFluidIngredients(left);
-            for (int i = 0; i < internalInv.length; i++) {
-                if (internalInv[i].isFluidEmpty()) continue;
-                contents = internalInv[i].handleFluidInternal(contents, simulate);
-                if (contents == null) {
-                    this.lockedSlot = i;
-                    return contents;
-                }
-                contents = copyFluidIngredients(left);
-            }
-            this.lockedSlot = -1;
+            return internalInv[lockedSlot].handleFluidInternal(left, simulate);
         }
+
+        this.lockedRecipeId = recipe.id;
+        List<FluidIngredient> contents = left;
+        for (int i = 0; i < internalInv.length; i++) {
+            if (internalInv[i].isFluidEmpty()) continue;
+            contents = internalInv[i].handleFluidInternal(contents, simulate);
+
+            if (contents == null) {
+                this.lockedSlot = i;
+                return contents;
+            }
+            contents = copyFluidIngredients(left);
+        }
+        this.lockedSlot = -1;
         return left;
     }
 
@@ -147,10 +148,8 @@ public class IOBufferRecipeHandler extends MachineTrait {
             if (io != IO.IN) return left;
             var machine = getMachine();
             machine.getCircuitInventory().handleRecipeInner(io, recipe, left, slotName, simulate);
-            left = handleItemInner(recipe, left, simulate);
-            return left != null
-                    ? machine.getShareInventory().handleRecipeInner(io, recipe, left, slotName, simulate)
-                    : null;
+            machine.getShareInventory().handleRecipeInner(io, recipe, left, slotName, simulate);
+            return handleItemInner(recipe, left, simulate);
         }
 
         @Override
@@ -212,10 +211,8 @@ public class IOBufferRecipeHandler extends MachineTrait {
                 @Nullable String slotName,
                 boolean simulate) {
             if (io != IO.IN) return left;
-            left = handleFluidInner(recipe, left, simulate);
-            return left != null
-                    ? getMachine().getShareTank().handleRecipeInner(io, recipe, left, slotName, simulate)
-                    : null;
+            getMachine().getShareTank().handleRecipeInner(io, recipe, left, slotName, simulate);
+            return handleFluidInner(recipe, left, simulate);
         }
 
         @Override
