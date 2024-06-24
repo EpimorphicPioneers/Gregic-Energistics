@@ -215,13 +215,15 @@ public class CraftingIOBufferPartMachine extends MEPartMachine
 
         if (getMainNode().isActive() && !this.returnBuffer.isEmpty()) {
             MEStorage aeNetwork = this.getMainNode().getGrid().getStorageService().getInventory();
-            for (var entry : returnBuffer.object2LongEntrySet()) {
+            var iterator = returnBuffer.object2LongEntrySet().fastIterator();
+            while (iterator.hasNext()) {
+                var entry = iterator.next();
                 var key = entry.getKey();
                 var amount = entry.getLongValue();
                 long inserted = StorageHelper.poweredInsert(
                         getMainNode().getGrid().getEnergyService(), aeNetwork, key, amount, actionSource);
                 if (inserted >= amount) {
-                    returnBuffer.removeLong(key);
+                    iterator.remove();
                 } else {
                     entry.setValue(amount - inserted);
                 }
